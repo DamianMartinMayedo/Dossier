@@ -32,8 +32,8 @@ export default function CollabGrid() {
               <Image
                 src={logo.src}
                 alt={logo.name}
-                width={120}
-                height={40}
+                width={160}
+                height={60}
                 className={styles.logo}
               />
             </div>

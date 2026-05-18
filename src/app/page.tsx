@@ -77,7 +77,7 @@ export default async function Home() {
               <p className="section-label">Proyectos seleccionados</p>
               <h2 className="section-title">Trabajo destacado</h2>
             </div>
-            <a href="/proyectos" className={styles.btnSecondary}>
+            <a href="/proyectos" className={styles.arrowLink}>
               Ver todos <span>→</span>
             </a>
           </div>
@@ -187,6 +187,9 @@ export default async function Home() {
             </a>
             <a href="mailto:damianmartinmayedo@gmail.com" className={styles.btnSecondary}>
               Email
+            </a>
+            <a href="https://linkedin.com/in/damian-martin" target="_blank" rel="noopener noreferrer" className={styles.btnSecondary}>
+              LinkedIn <span>↗</span>
             </a>
           </div>
         </div>

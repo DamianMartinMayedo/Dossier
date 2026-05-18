@@ -7,7 +7,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: end;
-  padding-block: var(--space-12) var(--space-16);
+  padding-block: var(--space-4) var(--space-16);
   padding-inline: var(--space-6);
   max-width: var(--content-wide);
   margin-inline: auto;
