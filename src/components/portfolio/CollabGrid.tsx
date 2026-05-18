@@ -2,17 +2,17 @@ import Image from "next/image";
 import styles from "./CollabGrid.module.css";
 
 const LOGOS = [
-  { src: "/assets/empresas/Barrabes.png", name: "Barrabes" },
-  { src: "/assets/empresas/Mandao.png", name: "Mandao" },
-  { src: "/assets/empresas/ciclogreen.png", name: "Ciclogreen" },
-  { src: "/assets/empresas/iwantic.png", name: "Iwantic" },
-  { src: "/assets/empresas/iwantpro.png", name: "Iwantpro" },
-  { src: "/assets/empresas/mapodec.png", name: "Mapodec" },
-  { src: "/assets/empresas/migallon.png", name: "Migallon" },
-  { src: "/assets/empresas/proxima.png", name: "Próxima Energía" },
-  { src: "/assets/empresas/proxya.png", name: "Proxya" },
-  { src: "/assets/empresas/starenlared.png", name: "Starenlared" },
-  { src: "/assets/empresas/transformacion digital.png", name: "Transformación Digital" },
+  { src: "/images/empresas/barrabes.webp", name: "Barrabes" },
+  { src: "/images/empresas/mandao.webp", name: "Mandao" },
+  { src: "/images/empresas/ciclogreen.webp", name: "Ciclogreen" },
+  { src: "/images/empresas/iwantic.webp", name: "Iwantic" },
+  { src: "/images/empresas/iwantpro.webp", name: "Iwantpro" },
+  { src: "/images/empresas/mapodec.webp", name: "Mapodec" },
+  { src: "/images/empresas/migallon.webp", name: "Migallón" },
+  { src: "/images/empresas/proxima.webp", name: "Próxima Energía" },
+  { src: "/images/empresas/proxya.webp", name: "Proxya" },
+  { src: "/images/empresas/starenlared.webp", name: "Starenlared" },
+  { src: "/images/empresas/transformacion-digital.webp", name: "Transformación Digital" },
 ];
 
 export default function CollabGrid() {
