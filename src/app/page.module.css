@@ -3,12 +3,12 @@
 }
 
 .hero {
-  min-height: 92vh;
+
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: end;
-  padding-block: var(--space-4) var(--space-16);
-  padding-inline: var(--space-6);
+  margin: var(--space-24) 0;
+  padding-inline: var(--space-4);
   max-width: var(--content-wide);
   margin-inline: auto;
   gap: var(--space-12);
@@ -249,6 +249,37 @@
 
 .aboutText:last-of-type {
   margin-bottom: var(--space-8);
+}
+
+.aboutStats {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-8);
+}
+
+.aboutStat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-full);
+}
+
+.aboutStatNum {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+
+.aboutStatLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .arrowLink {

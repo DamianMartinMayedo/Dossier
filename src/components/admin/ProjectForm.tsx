@@ -91,6 +91,7 @@ export default function ProjectForm({ project }: Props) {
       }
 
       const payload = {
+        ...(isEditing ? { id: project.id } : {}),
         title: form.title,
         slug: form.slug,
         category: form.category,
@@ -106,24 +107,17 @@ export default function ProjectForm({ project }: Props) {
         featured: form.featured,
         order: form.order,
         updated_at: new Date().toISOString(),
+        ...(isEditing ? {} : { created_at: new Date().toISOString() }),
       };
 
-      if (isEditing) {
-        const { error: updateError } = await supabase
-          .from("projects")
-          .update(payload)
-          .eq("id", project.id);
-        if (updateError) throw updateError;
-      } else {
-        const { error: insertError } = await supabase
-          .from("projects")
-          .insert({
-            ...payload,
-            id: uuidv4(),
-            created_at: new Date().toISOString(),
-          });
-        if (insertError) throw insertError;
-      }
+      const res = await fetch("/api/admin/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Error al guardar");
 
       router.push("/admin/proyectos");
       router.refresh();
@@ -137,8 +131,15 @@ export default function ProjectForm({ project }: Props) {
   async function handleDelete() {
     if (!project || !confirm("¿Eliminar este proyecto?")) return;
 
-    const supabase = createClient();
-    await supabase.from("projects").delete().eq("id", project.id);
+    const res = await fetch(`/api/admin/projects?id=${project.id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const result = await res.json();
+      alert(result.error || "Error al eliminar");
+      return;
+    }
 
     router.push("/admin/proyectos");
     router.refresh();

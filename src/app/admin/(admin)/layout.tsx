@@ -1,6 +1,7 @@
 import AdminNav from "@/components/admin/AdminNav";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import "../../globals.css";
 import styles from "./layout.module.css";
 
 export default async function AdminLayout({

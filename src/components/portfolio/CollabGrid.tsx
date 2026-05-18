@@ -16,24 +16,20 @@ const LOGOS = [
 ];
 
 export default function CollabGrid() {
+  const items = [...LOGOS, ...LOGOS];
+
   return (
     <section className={styles.section}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <p className={styles.label}>Empresas y clientes</p>
-          <p className={styles.title}>
-            He colaborado con equipos de producto, startups y agencias en España
-            y Latinoamérica
-          </p>
-        </div>
-        <div className={styles.grid}>
-          {LOGOS.map((logo) => (
-            <div key={logo.name} className={styles.item}>
+      <p className={styles.label}>Colaboraciones</p>
+      <div className={styles.wrap}>
+        <div className={styles.track}>
+          {items.map((logo, i) => (
+            <div key={`${logo.name}-${i}`} className={styles.item}>
               <Image
                 src={logo.src}
                 alt={logo.name}
-                width={160}
-                height={60}
+                width={200}
+                height={56}
                 className={styles.logo}
               />
             </div>

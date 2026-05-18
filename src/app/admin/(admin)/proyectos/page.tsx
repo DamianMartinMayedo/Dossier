@@ -11,37 +11,45 @@ export default async function AdminProyectos() {
     .order("order", { ascending: true });
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Proyectos</h1>
-        <Link href="/admin/proyectos/nuevo" className={styles.addBtn}>
-          + Nuevo
-        </Link>
-      </div>
-
-      {!projects || projects.length === 0 ? (
-        <p className={styles.empty}>No hay proyectos aún.</p>
-      ) : (
-        <div className={styles.list}>
-          {projects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/admin/proyectos/${project.id}`}
-              className={styles.row}
-            >
-              <div className={styles.rowInfo}>
-                <span className={styles.rowTitle}>{project.title}</span>
-                <span className={styles.rowMeta}>
-                  {project.category === "principal" ? "Principal" : "Secundario"}
-                  {" · "}
-                  {project.order}
-                </span>
-              </div>
-              <span className={styles.rowArrow}>&rarr;</span>
-            </Link>
-          ))}
+    <div className="container">
+      <div className={styles.page}>
+        <div className={styles.header}>
+          <div>
+            <p className="section-label">Portfolio</p>
+            <h1 className={styles.title}>Proyectos</h1>
+          </div>
+          <Link href="/admin/proyectos/nuevo" className={styles.addBtn}>
+            + Nuevo
+          </Link>
         </div>
-      )}
+
+        {!projects || projects.length === 0 ? (
+          <p className={styles.empty}>
+            No hay proyectos aún.{" "}
+            <Link href="/admin/proyectos/nuevo">Crea el primero.</Link>
+          </p>
+        ) : (
+          <div className={styles.list}>
+            {projects.map((project) => (
+              <Link
+                key={project.id}
+                href={`/admin/proyectos/${project.id}`}
+                className={styles.row}
+              >
+                <div className={styles.rowInfo}>
+                  <span className={styles.rowTitle}>{project.title}</span>
+                  <span className={styles.rowMeta}>
+                    {project.category === "principal" ? "Principal" : "Secundario"}
+                    {project.featured && " · Destacado"}
+                    {" · Orden "}{project.order}
+                  </span>
+                </div>
+                <span className={styles.rowArrow}>&rarr;</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

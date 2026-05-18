@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import ProjectCard from "@/components/portfolio/ProjectCard";
-import ProjectCardMinimal from "@/components/portfolio/ProjectCardMinimal";
 import Marquee from "@/components/portfolio/Marquee";
 import CollabGrid from "@/components/portfolio/CollabGrid";
 import Cursor from "@/components/ui/Cursor";
@@ -15,7 +14,6 @@ export default async function Home() {
     .order("order", { ascending: true });
 
   const principales = (projects || []).filter((p) => p.category === "principal");
-  const secundarios = (projects || []).filter((p) => p.category === "secundario");
 
   return (
     <>
@@ -46,23 +44,6 @@ export default async function Home() {
               </a>
             </div>
           </div>
-          <div className={styles.heroRight}>
-            <div className={styles.bigNumber}>10+</div>
-            <div className={styles.stats}>
-              <div className={styles.stat}>
-                <span className={styles.statNum}>8+</span>
-                <span className={styles.statLabel}>años de experiencia</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statNum}>30+</span>
-                <span className={styles.statLabel}>proyectos entregados</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.statNum}>3</span>
-                <span className={styles.statLabel}>co-fundaciones</span>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -75,44 +56,27 @@ export default async function Home() {
           <div className={styles.projectsHeader}>
             <div>
               <p className="section-label">Proyectos seleccionados</p>
-              <h2 className="section-title">Trabajo destacado</h2>
+              <h2 className="section-title">Trabajos destacados</h2>
             </div>
             <a href="/proyectos" className={styles.arrowLink}>
               Ver todos <span>→</span>
             </a>
           </div>
 
-          <div className={styles.grid}>
-            {principales.slice(0, 4).map((p, i) => (
-              <ProjectCard
-                key={p.id}
-                project={p}
-                featured={i === 0}
-                span={i === 0 ? 8 : i === 1 ? 4 : 6}
-              />
-            ))}
-          </div>
-
-          {principales.length === 0 && (
+          {principales.length === 0 ? (
             <p className={styles.emptyState}>
               Los proyectos aparecerán aquí cuando los añadas desde el panel admin.
             </p>
-          )}
-
-          {secundarios.length > 0 && (
-            <>
-              <div className={styles.separator}>
-                <div className={styles.sepLine} />
-                <span className={styles.sepText}>Otros proyectos</span>
-                <div className={styles.sepLine} />
-              </div>
-
-              <div className={styles.gridMinimal}>
-                {secundarios.slice(0, 4).map((p) => (
-                  <ProjectCardMinimal key={p.id} project={p} />
-                ))}
-              </div>
-            </>
+          ) : (
+            <div className={styles.grid}>
+              {principales.slice(0, 3).map((p) => (
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  span={4}
+                />
+              ))}
+            </div>
           )}
         </div>
       </section>
@@ -155,6 +119,20 @@ export default async function Home() {
                 <p className={styles.cardLabel}>Idiomas</p>
                 <p className={styles.cardSub}>Español nativo · Inglés intermedio</p>
               </div>
+              <div className={styles.aboutStats}>
+                <div className={styles.aboutStat}>
+                  <span className={styles.aboutStatNum}>8+</span>
+                  <span className={styles.aboutStatLabel}>años de experiencia</span>
+                </div>
+                <div className={styles.aboutStat}>
+                  <span className={styles.aboutStatNum}>30+</span>
+                  <span className={styles.aboutStatLabel}>proyectos entregados</span>
+                </div>
+                <div className={styles.aboutStat}>
+                  <span className={styles.aboutStatNum}>3</span>
+                  <span className={styles.aboutStatLabel}>co-fundaciones</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -174,21 +152,14 @@ export default async function Home() {
           <p className={styles.contactSub}>
             Escríbeme directamente. Respondo en menos de 24h.
           </p>
-          <a className={styles.contactEmail} href="mailto:damianmartinmayedo@gmail.com">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="2" y="4" width="20" height="16" rx="2" />
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-            </svg>
-            damianmartinmayedo@gmail.com
-          </a>
           <div className={styles.contactCta}>
             <a href="https://wa.me/34674341489" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
               WhatsApp <span>↗</span>
             </a>
-            <a href="mailto:damianmartinmayedo@gmail.com" className={styles.btnSecondary}>
-              Email
+            <a href="mailto:damianmartinmayedo@gmail.com" className={styles.btnPrimary}>
+              Email <span>↗</span>
             </a>
-            <a href="https://linkedin.com/in/damian-martin" target="_blank" rel="noopener noreferrer" className={styles.btnSecondary}>
+            <a href="https://linkedin.com/in/damian-martin" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
               LinkedIn <span>↗</span>
             </a>
           </div>

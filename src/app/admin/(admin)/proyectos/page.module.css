@@ -1,31 +1,33 @@
-.page {
-  max-width: 800px;
-}
-
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
+  align-items: flex-end;
+  margin-bottom: var(--space-8);
 }
 
 .title {
-  font-size: 1.6rem;
+  font-size: var(--text-xl);
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .addBtn {
-  padding: 10px 20px;
+  padding: var(--space-3) var(--space-6);
   background: var(--color-text);
   color: var(--color-bg);
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-weight: 500;
+  transition: opacity var(--transition-interactive);
+}
+
+.addBtn:hover {
+  opacity: 0.85;
 }
 
 .empty {
-  color: var(--color-muted);
-  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }
 
 .list {
@@ -33,7 +35,7 @@
   flex-direction: column;
   gap: 2px;
   background: var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -41,19 +43,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: var(--space-5) var(--space-6);
   background: var(--color-bg);
-  transition: background 0.15s;
+  transition: background var(--transition-interactive);
 }
 
 .row:hover {
-  background: #fafafa;
+  background: var(--color-surface-offset);
 }
 
 .rowInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .rowTitle {
@@ -61,11 +63,11 @@
 }
 
 .rowMeta {
-  font-size: 0.8rem;
-  color: var(--color-muted);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
 .rowArrow {
-  color: var(--color-muted);
-  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
 }

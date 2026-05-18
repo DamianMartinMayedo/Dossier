@@ -3,52 +3,54 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-surface);
+  background: var(--color-bg);
 }
 
 .form {
   width: 100%;
   max-width: 400px;
-  padding: 48px;
-  background: var(--color-bg);
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  padding: var(--space-12);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
 }
 
 .title {
-  font-size: 1.4rem;
+  font-size: var(--text-xl);
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
   text-align: center;
 }
 
 .error {
-  padding: 10px 14px;
-  background: #fef2f2;
-  color: #cc0000;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-bottom: 16px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
 }
 
 .field {
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 
 .label {
   display: block;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 500;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
 }
 
 .input {
   width: 100%;
-  padding: 10px 14px;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   outline: none;
+  background: var(--color-bg);
+  transition: border-color var(--transition-interactive);
 }
 
 .input:focus {
@@ -57,15 +59,16 @@
 
 .button {
   width: 100%;
-  padding: 12px;
+  padding: var(--space-3) var(--space-4);
   background: var(--color-text);
   color: var(--color-bg);
   border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
-  margin-top: 8px;
+  margin-top: var(--space-4);
   cursor: pointer;
+  transition: opacity var(--transition-interactive);
 }
 
 .button:disabled {

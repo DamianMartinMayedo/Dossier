@@ -6,9 +6,9 @@ import { useState, useEffect } from "react";
 import styles from "./Header.module.css";
 
 const NAV_LINKS = [
-  { href: "#proyectos", label: "Proyectos" },
-  { href: "#sobre", label: "Sobre mí" },
-  { href: "#contacto", label: "Contacto" },
+  { href: "/proyectos", label: "Proyectos" },
+  { href: "/#sobre", label: "Sobre mí" },
+  { href: "/#contacto", label: "Contacto" },
 ];
 
 const sunIcon = (
@@ -87,9 +87,9 @@ export default function Header() {
 
         <nav className={styles.nav}>
           {NAV_LINKS.map(({ href, label }) => (
-            <a key={href} href={href} className={styles.link}>
+            <Link key={href} href={href} className={styles.link}>
               {label}
-            </a>
+            </Link>
           ))}
           <button
             onClick={toggleTheme}

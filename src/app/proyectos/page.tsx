@@ -31,18 +31,11 @@ export default async function Proyectos() {
         <section className={styles.section}>
           <p className={styles.sectionLabel}>Proyectos principales</p>
           <div className={styles.grid}>
-            {principales.map((p, i) => (
+            {principales.map((p) => (
               <ProjectCard
                 key={p.id}
                 project={p}
-                featured={i === 0 && principales.length > 2}
-                span={
-                  i === 0 && principales.length > 2
-                    ? 8
-                    : i === 1 && principales.length > 2
-                      ? 4
-                      : 6
-                }
+                span={4}
               />
             ))}
           </div>
@@ -51,7 +44,7 @@ export default async function Proyectos() {
 
       {secundarios.length > 0 && (
         <section className={styles.section}>
-          <p className={styles.sectionLabel}>Proyectos secundarios</p>
+          <p className={styles.sectionLabel}>Otros proyectos</p>
           <div className={styles.gridMinimal}>
             {secundarios.map((p) => (
               <ProjectCardMinimal key={p.id} project={p} />

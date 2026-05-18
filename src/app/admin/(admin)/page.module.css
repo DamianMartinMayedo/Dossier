@@ -1,29 +1,26 @@
-.page {
-  max-width: 800px;
-}
-
 .title {
-  font-size: 1.6rem;
+  font-size: var(--text-xl);
   font-weight: 700;
-  margin-bottom: 32px;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-8);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 40px;
+  gap: var(--space-5);
+  margin-bottom: var(--space-10);
 }
 
 .card {
-  padding: 24px;
+  padding: var(--space-6);
   background: var(--color-bg);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  transition: border-color 0.2s;
+  gap: var(--space-2);
+  transition: border-color var(--transition-interactive);
 }
 
 .card:hover {
@@ -31,25 +28,73 @@
 }
 
 .number {
-  font-size: 2rem;
+  font-size: var(--text-2xl);
   font-weight: 700;
 }
 
 .label {
-  font-size: 0.85rem;
-  color: var(--color-muted);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
 }
 
 .actions {
   display: flex;
-  gap: 12px;
+  gap: var(--space-4);
 }
 
 .actionBtn {
-  padding: 10px 20px;
+  padding: var(--space-3) var(--space-6);
   background: var(--color-text);
   color: var(--color-bg);
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-weight: 500;
+  transition: opacity var(--transition-interactive);
+}
+
+.actionBtn:hover {
+  opacity: 0.85;
+}
+
+.seedSection {
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-divider);
+}
+
+.seedLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.seedBtn {
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-surface-offset-2);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: all var(--transition-interactive);
+}
+
+.seedBtn:hover:not(:disabled) {
+  background: var(--color-surface-dynamic);
+  border-color: var(--color-text);
+}
+
+.seedBtn:disabled {
+  opacity: 0.6;
+}
+
+.seedMsg {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.seedError {
+  color: var(--color-primary);
 }

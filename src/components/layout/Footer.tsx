@@ -18,6 +18,13 @@ export default function Footer() {
         <div className={styles.links}>
           <a href="mailto:damianmartinmayedo@gmail.com">Email</a>
           <a
+            href="https://wa.me/34674341489"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp
+          </a>
+          <a
             href="https://linkedin.com/in/damian-martin"
             target="_blank"
             rel="noopener noreferrer"

@@ -20,9 +20,12 @@ export default async function EditarProyecto({ params }: Props) {
   if (!project) notFound();
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>Editar proyecto</h1>
-      <ProjectForm project={project} />
+    <div className="container">
+      <div className={styles.page}>
+        <p className="section-label">Proyectos</p>
+        <h1 className={styles.title}>Editar proyecto</h1>
+        <ProjectForm project={project} />
+      </div>
     </div>
   );
 }
