@@ -1,0 +1,27 @@
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.filter {
+  padding: 6px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  background: transparent;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  transition: all 0.2s ease;
+}
+
+.filter:hover {
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+.active {
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-color: var(--color-text);
+}

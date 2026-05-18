@@ -1,0 +1,61 @@
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+.section {
+  text-align: center;
+}
+
+.avatar {
+  margin: 0 auto 24px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatarImg {
+  object-fit: cover;
+}
+
+.name {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.bio {
+  margin-top: 16px;
+  font-size: 1.05rem;
+  color: var(--color-muted);
+  line-height: 1.7;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.skills {
+  margin-top: 48px;
+}
+
+.heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.skillList {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.skill {
+  padding: 6px 16px;
+  background: var(--color-surface);
+  border-radius: 100px;
+  font-size: 0.85rem;
+}

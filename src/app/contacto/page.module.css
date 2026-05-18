@@ -1,0 +1,21 @@
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+.section {
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin-top: 12px;
+  font-size: 1.05rem;
+  color: var(--color-muted);
+}

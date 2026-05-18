@@ -1,0 +1,94 @@
+.page {
+  padding-bottom: 80px;
+}
+
+.cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.coverImg {
+  object-fit: cover;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 24px 0;
+}
+
+.category {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.title {
+  margin-top: 8px;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.client,
+.year {
+  margin-top: 4px;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+.description {
+  margin-top: 24px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.services {
+  margin-top: 40px;
+}
+
+.heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.serviceList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.service {
+  padding: 4px 14px;
+  background: var(--color-surface);
+  border-radius: 100px;
+  font-size: 0.85rem;
+}
+
+.gallery {
+  margin-top: 48px;
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.galleryItem {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.galleryImg {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}

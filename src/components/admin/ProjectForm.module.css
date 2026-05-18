@@ -1,0 +1,103 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.error {
+  padding: 10px 14px;
+  background: #fef2f2;
+  color: #cc0000;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.input,
+.textarea {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: var(--color-bg);
+  outline: none;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--color-text);
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.checkLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-text);
+}
+
+.fileInput {
+  font-size: 0.85rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.submitBtn {
+  padding: 12px 28px;
+  background: var(--color-text);
+  color: var(--color-bg);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+}
+
+.deleteBtn {
+  padding: 12px 20px;
+  background: transparent;
+  border: 1px solid #cc0000;
+  color: #cc0000;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
