@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import ProjectForm from "@/components/admin/ProjectForm";
-import styles from "./page.module.css";
+import styles from "../form-page.module.css";
 
 interface Props {
   params: Promise<{ id: string }>;

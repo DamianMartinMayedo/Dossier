@@ -1,5 +1,5 @@
 import ProjectForm from "@/components/admin/ProjectForm";
-import styles from "./page.module.css";
+import styles from "../form-page.module.css";
 
 export default function NuevoProyecto() {
   return (

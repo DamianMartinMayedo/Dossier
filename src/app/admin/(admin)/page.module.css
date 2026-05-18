@@ -96,5 +96,5 @@
 }
 
 .seedError {
-  color: var(--color-primary);
+  color: var(--color-error);
 }

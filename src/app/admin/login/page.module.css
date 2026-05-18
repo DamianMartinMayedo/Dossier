@@ -24,8 +24,8 @@
 
 .error {
   padding: var(--space-3) var(--space-4);
-  background: var(--color-primary-highlight);
-  color: var(--color-primary);
+  background: var(--color-error-bg);
+  color: var(--color-error);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   margin-bottom: var(--space-4);
@@ -49,12 +49,15 @@
   border-radius: var(--radius-md);
   font-size: var(--text-base);
   outline: none;
-  background: var(--color-bg);
-  transition: border-color var(--transition-interactive);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color var(--transition-interactive),
+              box-shadow var(--transition-interactive);
 }
 
 .input:focus {
-  border-color: var(--color-text);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-highlight);
 }
 
 .button {
