@@ -94,7 +94,7 @@ export default async function Home() {
           </div>
 
           {principales.length === 0 && (
-            <p style={{ color: "var(--color-text-muted)", textAlign: "center", padding: "var(--space-16) 0" }}>
+            <p className={styles.emptyState}>
               Los proyectos aparecerán aquí cuando los añadas desde el panel admin.
             </p>
           )}
