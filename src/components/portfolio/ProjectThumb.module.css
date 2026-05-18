@@ -1,0 +1,12 @@
+.img {
+  object-fit: cover;
+}
+
+.initials {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--color-text-muted);
+  opacity: 0.45;
+  transition: opacity var(--transition-interactive);
+}

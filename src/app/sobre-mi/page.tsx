@@ -5,7 +5,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sobre mí",
-  description: "Conoce más sobre Damián Martín, diseñador UI/UX y de producto.",
+  description: "Conoce más sobre Damián Martín: 8+ años en diseño UI/UX, branding y producto digital. Disponible para nuevos proyectos.",
+  alternates: { canonical: "https://damianmartin.es/sobre-mi" },
 };
 
 export default async function SobreMi() {
@@ -37,6 +38,7 @@ export default async function SobreMi() {
           />
         </div>
         <h1 className={styles.name}>{profile?.name || "Damián Martín"}</h1>
+        <p className={styles.role}>Diseñador UI/UX · Branding · Producto digital · Sevilla</p>
         <p className={styles.bio}>{profile?.bio}</p>
 
         {profile.skills && profile.skills.length > 0 && (

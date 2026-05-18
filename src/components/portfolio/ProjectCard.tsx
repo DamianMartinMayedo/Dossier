@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Project } from "@/types";
+import ProjectThumb from "./ProjectThumb";
 import styles from "./ProjectCard.module.css";
 
 interface Props {
@@ -23,15 +24,10 @@ export default function ProjectCard({ project, featured, span = 6 }: Props) {
       <Link href={`/proyecto/${project.slug}`} className={styles.card}>
         <div className={styles.image}>
           <div className={styles.imageInner}>
-            {project.cover_image ? (
-              <img
-                src={project.cover_image}
-                alt={project.title}
-                className={styles.img}
-              />
-            ) : (
-              <span>{project.title.slice(0, 2).toUpperCase()}</span>
-            )}
+            <ProjectThumb
+              project={project}
+              sizes="(min-width: 960px) 33vw, (min-width: 640px) 50vw, 100vw"
+            />
           </div>
           {project.services.length > 0 && (
             <span className={styles.tag}>{project.services[0]}</span>

@@ -8,6 +8,10 @@ export default function Cursor() {
   const ringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Skip on touch / pointer-coarse devices — CSS `@media (hover: none)` hides
+    // the elements but the RAF loop would keep running without this guard.
+    if (window.matchMedia("(hover: none)").matches) return;
+
     const dot = dotRef.current;
     const ring = ringRef.current;
     if (!dot || !ring) return;

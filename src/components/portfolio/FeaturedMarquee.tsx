@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import type { Project } from "@/types";
+import ProjectThumb from "./ProjectThumb";
 import styles from "./FeaturedMarquee.module.css";
 
 interface Props {
@@ -27,11 +28,10 @@ export default function FeaturedMarquee({ projects }: Props) {
           >
             <div className={styles.image}>
               <div className={styles.imageInner}>
-                {p.cover_image ? (
-                  <img src={p.cover_image} alt={p.title} className={styles.img} />
-                ) : (
-                  <span>{p.title.slice(0, 2).toUpperCase()}</span>
-                )}
+                <ProjectThumb
+                  project={p}
+                  sizes="(min-width: 960px) 50vw, 90vw"
+                />
               </div>
               {p.services.length > 0 && (
                 <span className={styles.tag}>{p.services[0]}</span>

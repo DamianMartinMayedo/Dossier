@@ -6,7 +6,8 @@ import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Proyectos",
-  description: "Todos los proyectos de Damián Martín.",
+  description: "Portfolio completo: proyectos de UI/UX, branding y producto digital de Damián Martín.",
+  alternates: { canonical: "https://damianmartin.es/proyectos" },
 };
 
 export default async function Proyectos() {

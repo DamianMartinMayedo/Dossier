@@ -34,7 +34,12 @@ export default function ContactForm() {
 
   if (status === "success") {
     return (
-      <div className={styles.success}>
+      <div
+        className={styles.success}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         <p>Mensaje enviado. Gracias por escribirme.</p>
       </div>
     );

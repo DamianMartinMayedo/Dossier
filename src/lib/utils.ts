@@ -1,3 +1,13 @@
+import type { Project } from "@/types";
+
+/**
+ * Returns the best URL to use as the project cover image.
+ * Falls back to null when there is no image (the component shows initials instead).
+ */
+export function getProjectCover(project: Pick<Project, "cover_image" | "images">): string | null {
+  return project.cover_image ?? (project.images?.[0] ?? null);
+}
+
 export function cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(" ");
 }

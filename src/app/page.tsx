@@ -3,6 +3,7 @@ import ProjectCard from "@/components/portfolio/ProjectCard";
 import Marquee from "@/components/portfolio/Marquee";
 import CollabGrid from "@/components/portfolio/CollabGrid";
 import Cursor from "@/components/ui/Cursor";
+import { CONTACT } from "@/lib/contact";
 import styles from "./page.module.css";
 
 export default async function Home() {
@@ -33,7 +34,7 @@ export default async function Home() {
               <span>Designer</span>
             </h1>
             <p className={styles.descriptor}>
-              UI/UX, branding y ecosistemas digitales de principio a fin. Con base en Sevilla, trabajo con equipos y clientes globales.
+              Llevo 8+ años ayudando a startups y empresas a convertir ideas confusas en productos claros. Trabajo end-to-end: investigación, UI/UX, branding y diseño general — lo que el proyecto necesite.
             </p>
             <div className={styles.ctaRow}>
               <a href="#proyectos" className={styles.btnPrimary}>
@@ -91,17 +92,17 @@ export default async function Home() {
           <div className={styles.aboutGrid}>
             <div>
               <h2 className={styles.aboutTitle}>
-                Diseñador con visión de{" "}
-                <em>producto</em>
+                Diseño con visión de{" "}
+                <em>producto</em>, no solo pantallas.
               </h2>
               <p className={styles.aboutText}>
-                Licenciado en Diseño de Comunicación Visual y Máster en Diseño Gráfico y Multimedia. He liderado proyectos end-to-end desde la investigación hasta el lanzamiento, colaborando con equipos de producto, desarrollo y marketing.
+                Vengo del diseño gráfico clásico —licenciatura y máster— y aterricé en producto digital aprendiendo en startups. Eso significa que tanto puedo cerrar un design system como hacerte un logo, una landing o un sistema de impresos.
               </p>
               <p className={styles.aboutText}>
-                Mi enfoque une rigor analítico y sensibilidad visual: identifico problemas reales de usuario y los resuelvo con interfaces que también son bellas.
+                Si necesitas un especialista puro, soy honesto: hay gente más profunda que yo en UX research. Si necesitas un diseñador que entienda el problema completo y entregue, ahí me muevo bien.
               </p>
-              <a href="#contacto" className={styles.arrowLink}>
-                Hablemos <span>→</span>
+              <a href="/sobre-mi" className={styles.arrowLink}>
+                Más sobre mí <span>→</span>
               </a>
             </div>
             <div className={styles.aboutCards}>
@@ -145,21 +146,19 @@ export default async function Home() {
             Trabajemos juntos
           </span>
           <h2 className={styles.contactHeadline}>
-            ¿Tienes un proyecto
-            <br />
-            en <em>mente</em>?
+            ¿Hablamos?
           </h2>
           <p className={styles.contactSub}>
-            Escríbeme directamente. Respondo en menos de 24h.
+            Cuéntame qué tienes entre manos. Respondo en menos de 24h, casi siempre antes.
           </p>
           <div className={styles.contactCta}>
-            <a href="https://wa.me/34674341489" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
+            <a href={CONTACT.whatsapp} target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
               WhatsApp <span>↗</span>
             </a>
-            <a href="mailto:damianmartinmayedo@gmail.com" className={styles.btnPrimary}>
+            <a href={`mailto:${CONTACT.email}`} className={styles.btnPrimary}>
               Email <span>↗</span>
             </a>
-            <a href="https://linkedin.com/in/damian-martin" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
+            <a href={CONTACT.linkedin} target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
               LinkedIn <span>↗</span>
             </a>
           </div>
