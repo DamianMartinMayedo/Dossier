@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import styles from "./page.module.css";
 
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient();
   const { data: project } = await supabase
     .from("projects")
-    .select("*")
+    .select("title, description, slug, cover_image")
     .eq("slug", slug)
     .single();
 
@@ -55,69 +56,79 @@ export default async function Proyecto({ params }: Props) {
 
   if (!project) notFound();
 
+  // Build metadata tags: services + year + client
+  const tags = [
+    ...project.services,
+    project.year,
+    project.client,
+  ].filter(Boolean) as string[];
+
   return (
     <div className={styles.page}>
+      {/* ── Back ── */}
+      <div className="container">
+        <Link href="/proyectos" className={styles.back}>
+          ← Todos los proyectos
+        </Link>
+      </div>
+
+      {/* ── Header ── */}
+      <header className={styles.header}>
+        <p className={styles.category}>
+          {project.category === "principal" ? "Proyecto principal" : "Proyecto secundario"}
+        </p>
+        <h1 className={styles.title}>{project.title}</h1>
+        {tags.length > 0 && (
+          <div className={styles.meta}>
+            {tags.map((tag) => (
+              <span key={tag} className={styles.tag}>{tag}</span>
+            ))}
+          </div>
+        )}
+      </header>
+
+      {/* ── Cover ── */}
       {project.cover_image && (
         <div className={styles.cover}>
-          <Image
-            src={project.cover_image}
-            alt={project.title}
-            fill
-            className={styles.coverImg}
-            sizes="100vw"
-            priority
-          />
+          <div className={styles.coverInner}>
+            <Image
+              src={project.cover_image}
+              alt={project.title}
+              fill
+              sizes="(min-width: 960px) 960px, 100vw"
+              className={styles.coverImg}
+              priority
+            />
+          </div>
         </div>
       )}
 
-      <div className={styles.content}>
-        <span className={styles.category}>
-          {project.category === "principal"
-            ? "Proyecto principal"
-            : "Proyecto secundario"}
-        </span>
+      {/* ── Description ── */}
+      {project.description && (
+        <div className={styles.body}>
+          <p className={styles.description}>{project.description}</p>
+        </div>
+      )}
 
-        <h1 className={styles.title}>{project.title}</h1>
-
-        {project.client && (
-          <p className={styles.client}>Cliente: {project.client}</p>
-        )}
-        {project.year && <p className={styles.year}>Año: {project.year}</p>}
-
-        <p className={styles.description}>{project.description}</p>
-
-        {project.services && project.services.length > 0 && (
-          <div className={styles.services}>
-            <h2 className={styles.heading}>Servicios</h2>
-            <div className={styles.serviceList}>
-              {project.services.map((service: string) => (
-                <span key={service} className={styles.service}>
-                  {service}
-                </span>
-              ))}
-            </div>
+      {/* ── Gallery ── */}
+      {project.images && project.images.length > 0 && (
+        <div className={styles.gallery}>
+          <p className={styles.galleryLabel}>Imágenes del proyecto</p>
+          <div className={styles.galleryGrid}>
+            {project.images.map((image: string, i: number) => (
+              <div key={i} className={styles.galleryItem}>
+                <Image
+                  src={image}
+                  alt={`${project.title} — imagen ${i + 1}`}
+                  fill
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                  className={styles.galleryImg}
+                />
+              </div>
+            ))}
           </div>
-        )}
-
-        {project.images && project.images.length > 0 && (
-          <div className={styles.gallery}>
-            <h2 className={styles.heading}>Galería</h2>
-            <div className={styles.galleryGrid}>
-              {project.images.map((image: string, i: number) => (
-                <div key={i} className={styles.galleryItem}>
-                  <Image
-                    src={image}
-                    alt={`${project.title} — imagen ${i + 1}`}
-                    width={800}
-                    height={600}
-                    className={styles.galleryImg}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
