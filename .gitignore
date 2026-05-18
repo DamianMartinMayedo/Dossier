@@ -40,9 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# assets
-/public/assets/
-public/assets
+# assets originales (eliminados — las imágenes optimizadas están en public/images/ y se commitean)
+# /public/assets/ ya no existe
 
 # personal / docs no checkeados
 /cvs/
