@@ -3,6 +3,8 @@ import { formatDate } from "@/lib/utils";
 import MessagesActions from "@/components/admin/MessagesActions";
 import styles from "./page.module.css";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminMensajes() {
   const supabase = await createClient();
 
@@ -36,7 +38,13 @@ export default async function AdminMensajes() {
                   </span>
                 </div>
                 <p className={styles.msgBody}>{msg.message}</p>
-                <MessagesActions messageId={msg.id} read={msg.read} />
+                <MessagesActions
+                  messageId={msg.id}
+                  read={msg.read}
+                  email={msg.email}
+                  name={msg.name}
+                  originalMessage={msg.message}
+                />
               </div>
             ))}
           </div>

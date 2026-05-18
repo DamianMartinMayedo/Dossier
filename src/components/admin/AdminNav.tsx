@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import styles from "./AdminNav.module.css";
 
 interface Props {
@@ -48,7 +49,10 @@ export default function AdminNav({ userEmail }: Props) {
       </nav>
 
       <div className={styles.bottom}>
-        <span className={styles.email}>{userEmail}</span>
+        <div className={styles.bottomRow}>
+          <span className={styles.email}>{userEmail}</span>
+          <ThemeToggle />
+        </div>
         <button onClick={handleLogout} className={styles.logout}>
           Cerrar sesión
         </button>

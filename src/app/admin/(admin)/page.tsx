@@ -1,27 +1,23 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import SeedButton from "./SeedButton";
 import styles from "./page.module.css";
 
-export default function AdminDashboard() {
-  const [seeding, setSeeding] = useState(false);
-  const [seedMsg, setSeedMsg] = useState("");
+export const dynamic = "force-dynamic";
 
-  async function handleSeed() {
-    setSeeding(true);
-    setSeedMsg("");
-    try {
-      const res = await fetch("/api/admin/seed", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setSeedMsg(`Seed completo: ${data.count} proyectos insertados.`);
-    } catch (err) {
-      setSeedMsg(err instanceof Error ? err.message : "Error en seed");
-    } finally {
-      setSeeding(false);
-    }
-  }
+export default async function AdminDashboard() {
+  const supabase = await createClient();
+
+  const [{ count: projectsCount }, { count: unreadCount }] = await Promise.all([
+    supabase.from("projects").select("*", { count: "exact", head: true }),
+    supabase
+      .from("contact_messages")
+      .select("*", { count: "exact", head: true })
+      .eq("read", false),
+  ]);
+
+  const allowSeed =
+    process.env.NODE_ENV !== "production" || process.env.ALLOW_SEED === "true";
 
   return (
     <div className="container">
@@ -31,12 +27,12 @@ export default function AdminDashboard() {
 
         <div className={styles.grid}>
           <Link href="/admin/proyectos" className={styles.card}>
-            <span className={styles.number}>—</span>
+            <span className={styles.number}>{projectsCount ?? 0}</span>
             <span className={styles.label}>Proyectos</span>
           </Link>
 
           <Link href="/admin/mensajes" className={styles.card}>
-            <span className={styles.number}>—</span>
+            <span className={styles.number}>{unreadCount ?? 0}</span>
             <span className={styles.label}>Mensajes sin leer</span>
           </Link>
         </div>
@@ -47,25 +43,7 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
-        <div className={styles.seedSection}>
-          <p className={styles.seedLabel}>Datos de ejemplo</p>
-          <button
-            onClick={handleSeed}
-            disabled={seeding}
-            className={styles.seedBtn}
-          >
-            {seeding ? "Insertando..." : "Insertar proyectos de ejemplo"}
-          </button>
-          {seedMsg && (
-            <p
-              className={`${styles.seedMsg} ${
-                seedMsg.includes("Error") ? styles.seedError : ""
-              }`}
-            >
-              {seedMsg}
-            </p>
-          )}
-        </div>
+        {allowSeed && <SeedButton />}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { createClient } from "@/lib/supabase/client";
@@ -10,6 +11,17 @@ import styles from "./ProjectForm.module.css";
 
 interface Props {
   project?: Project;
+}
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_GALLERY_IMAGES = 12;
+const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"];
+
+function pathFromPublicUrl(url: string): string | null {
+  const marker = "/storage/v1/object/public/projects/";
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  return url.slice(idx + marker.length);
 }
 
 export default function ProjectForm({ project }: Props) {
@@ -29,9 +41,31 @@ export default function ProjectForm({ project }: Props) {
   });
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>(project?.images || []);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const newGalleryPreviews = useMemo(
+    () => galleryFiles.map((f) => URL.createObjectURL(f)),
+    [galleryFiles]
+  );
+
+  useEffect(() => {
+    if (!coverFile) {
+      setCoverPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(coverFile);
+    setCoverPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [coverFile]);
+
+  useEffect(() => {
+    return () => newGalleryPreviews.forEach((u) => URL.revokeObjectURL(u));
+  }, [newGalleryPreviews]);
 
   function updateField<K extends keyof ProjectFormData>(
     key: K,
@@ -43,22 +77,81 @@ export default function ProjectForm({ project }: Props) {
     }
   }
 
-  async function uploadFile(file: File, bucket: string): Promise<string> {
+  function validateFile(file: File): string | null {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return `Tipo no permitido: ${file.name}. Usa PNG, JPG, WebP, GIF o SVG.`;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return `${file.name} pesa más de 10 MB.`;
+    }
+    return null;
+  }
+
+  function onCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      const err = validateFile(file);
+      if (err) {
+        setError(err);
+        e.target.value = "";
+        return;
+      }
+    }
+    setError("");
+    setCoverFile(file);
+  }
+
+  function onGalleryChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    for (const f of files) {
+      const err = validateFile(f);
+      if (err) {
+        setError(err);
+        e.target.value = "";
+        return;
+      }
+    }
+    const totalCount = existingImages.length + files.length;
+    if (totalCount > MAX_GALLERY_IMAGES) {
+      setError(`Máximo ${MAX_GALLERY_IMAGES} imágenes en la galería.`);
+      e.target.value = "";
+      return;
+    }
+    setError("");
+    setGalleryFiles(files);
+  }
+
+  function removeExistingImage(url: string) {
+    setExistingImages((prev) => prev.filter((u) => u !== url));
+    setRemovedImages((prev) => [...prev, url]);
+  }
+
+  async function uploadFile(file: File): Promise<string> {
     const supabase = createClient();
     const ext = file.name.split(".").pop() || "jpg";
     const fileName = `${uuidv4()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
-      .from(bucket)
+      .from("projects")
       .upload(fileName, file);
 
     if (uploadError) throw uploadError;
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from(bucket).getPublicUrl(fileName);
+    } = supabase.storage.from("projects").getPublicUrl(fileName);
 
     return publicUrl;
+  }
+
+  async function deleteStorageFiles(urls: string[]) {
+    if (urls.length === 0) return;
+    const paths = urls
+      .map(pathFromPublicUrl)
+      .filter((p): p is string => Boolean(p));
+    if (paths.length === 0) return;
+    const supabase = createClient();
+    await supabase.storage.from("projects").remove(paths);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -67,27 +160,19 @@ export default function ProjectForm({ project }: Props) {
     setError("");
 
     try {
-      const supabase = createClient();
-
       let coverImage = project?.cover_image || null;
 
       if (coverFile) {
         if (project?.cover_image) {
-          const oldPath = project.cover_image.split("/").pop();
-          if (oldPath) {
-            await supabase.storage.from("projects").remove([oldPath]);
-          }
+          await deleteStorageFiles([project.cover_image]);
         }
-        coverImage = await uploadFile(coverFile, "projects");
+        coverImage = await uploadFile(coverFile);
       }
 
-      let images = project?.images || [];
-
+      let images = [...existingImages];
       if (galleryFiles.length > 0) {
-        const newUrls = await Promise.all(
-          galleryFiles.map((f) => uploadFile(f, "projects"))
-        );
-        images = isEditing ? [...images, ...newUrls] : newUrls;
+        const newUrls = await Promise.all(galleryFiles.map(uploadFile));
+        images = [...images, ...newUrls];
       }
 
       const payload = {
@@ -106,8 +191,6 @@ export default function ProjectForm({ project }: Props) {
         year: form.year || null,
         featured: form.featured,
         order: form.order,
-        updated_at: new Date().toISOString(),
-        ...(isEditing ? {} : { created_at: new Date().toISOString() }),
       };
 
       const res = await fetch("/api/admin/projects", {
@@ -119,6 +202,10 @@ export default function ProjectForm({ project }: Props) {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Error al guardar");
 
+      if (removedImages.length > 0) {
+        await deleteStorageFiles(removedImages);
+      }
+
       router.push("/admin/proyectos");
       router.refresh();
     } catch (err) {
@@ -129,7 +216,7 @@ export default function ProjectForm({ project }: Props) {
   }
 
   async function handleDelete() {
-    if (!project || !confirm("¿Eliminar este proyecto?")) return;
+    if (!project || !confirm("¿Eliminar este proyecto? Se borrarán también sus imágenes.")) return;
 
     const res = await fetch(`/api/admin/projects?id=${project.id}`, {
       method: "DELETE",
@@ -140,6 +227,12 @@ export default function ProjectForm({ project }: Props) {
       alert(result.error || "Error al eliminar");
       return;
     }
+
+    const urlsToDelete = [
+      ...(project.cover_image ? [project.cover_image] : []),
+      ...project.images,
+    ];
+    await deleteStorageFiles(urlsToDelete);
 
     router.push("/admin/proyectos");
     router.refresh();
@@ -167,6 +260,8 @@ export default function ProjectForm({ project }: Props) {
           value={form.slug}
           onChange={(e) => updateField("slug", e.target.value)}
           required
+          pattern="[a-z0-9-]+"
+          title="Solo minúsculas, números y guiones"
           className={styles.input}
         />
       </div>
@@ -261,35 +356,81 @@ export default function ProjectForm({ project }: Props) {
 
       <div className={styles.field}>
         <label className={styles.label}>Imagen de portada</label>
-        {project?.cover_image && !coverFile && (
-          <p className={styles.hint}>
-            Actual: {project.cover_image.split("/").pop()}
-          </p>
+        {(coverPreview || project?.cover_image) && (
+          <div className={styles.coverPreview}>
+            <Image
+              src={coverPreview || project!.cover_image!}
+              alt="Portada"
+              width={320}
+              height={200}
+              className={styles.previewImg}
+              unoptimized
+            />
+          </div>
         )}
         <input
           type="file"
-          accept="image/*"
-          onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+          accept={ALLOWED_TYPES.join(",")}
+          onChange={onCoverChange}
           className={styles.fileInput}
         />
+        <p className={styles.hint}>PNG, JPG, WebP, GIF o SVG. Máx 10 MB.</p>
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Galería de imágenes</label>
-        {project?.images && project.images.length > 0 && (
-          <p className={styles.hint}>
-            {project.images.length} imágenes actuales. Las nuevas se añadirán.
-          </p>
+        <label className={styles.label}>Galería</label>
+        {existingImages.length > 0 && (
+          <div className={styles.gallery}>
+            {existingImages.map((url) => (
+              <div key={url} className={styles.galleryItem}>
+                <Image
+                  src={url}
+                  alt=""
+                  width={120}
+                  height={90}
+                  className={styles.galleryImg}
+                  unoptimized
+                />
+                <button
+                  type="button"
+                  onClick={() => removeExistingImage(url)}
+                  className={styles.galleryRemove}
+                  aria-label="Quitar imagen"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {newGalleryPreviews.length > 0 && (
+          <div className={styles.gallery}>
+            {newGalleryPreviews.map((url, i) => (
+              <div key={url} className={styles.galleryItem}>
+                <Image
+                  src={url}
+                  alt=""
+                  width={120}
+                  height={90}
+                  className={styles.galleryImg}
+                  unoptimized
+                />
+                <span className={styles.newBadge}>Nueva {i + 1}</span>
+              </div>
+            ))}
+          </div>
         )}
         <input
           type="file"
-          accept="image/*"
+          accept={ALLOWED_TYPES.join(",")}
           multiple
-          onChange={(e) =>
-            setGalleryFiles(Array.from(e.target.files || []))
-          }
+          onChange={onGalleryChange}
           className={styles.fileInput}
         />
+        <p className={styles.hint}>
+          Hasta {MAX_GALLERY_IMAGES} imágenes en total (actualmente{" "}
+          {existingImages.length + galleryFiles.length}).
+        </p>
       </div>
 
       <div className={styles.buttons}>

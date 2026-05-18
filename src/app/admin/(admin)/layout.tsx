@@ -17,7 +17,10 @@ export default async function AdminLayout({
   if (!user) redirect("/admin/login");
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  if (adminEmail && user.email?.toLowerCase() !== adminEmail.toLowerCase()) {
+  if (!adminEmail) {
+    throw new Error("ADMIN_EMAIL no configurado en el entorno");
+  }
+  if (user.email?.toLowerCase() !== adminEmail.toLowerCase()) {
     await supabase.auth.signOut();
     redirect("/admin/login");
   }

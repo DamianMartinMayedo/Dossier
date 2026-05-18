@@ -48,20 +48,3 @@
 .link:hover {
   color: var(--color-text);
 }
-
-.toggleBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-full);
-  color: var(--color-text-muted);
-  transition: color var(--transition-interactive),
-    background var(--transition-interactive);
-}
-
-.toggleBtn:hover {
-  background: var(--color-surface-offset);
-  color: var(--color-text);
-}

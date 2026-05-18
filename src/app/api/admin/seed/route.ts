@@ -1,5 +1,6 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, requireAdmin } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 const SEED_PROJECTS = [
   {
@@ -89,23 +90,23 @@ const SEED_PROJECTS = [
 ];
 
 export async function POST() {
-  const adminEmail = process.env.ADMIN_EMAIL;
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SEED !== "true") {
+    return NextResponse.json({ error: "Seed deshabilitado" }, { status: 403 });
+  }
+
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
   try {
-    const supabase = await createAdminClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user || user.email?.toLowerCase() !== adminEmail?.toLowerCase()) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
+    const supabase = createAdminClient();
     for (const project of SEED_PROJECTS) {
       const { error } = await supabase
         .from("projects")
         .upsert(project, { onConflict: "id" });
       if (error) throw error;
     }
-
+    revalidatePath("/");
+    revalidatePath("/proyectos");
     return NextResponse.json({ success: true, count: SEED_PROJECTS.length });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error desconocido";
@@ -114,18 +115,21 @@ export async function POST() {
 }
 
 export async function DELETE() {
-  const adminEmail = process.env.ADMIN_EMAIL;
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SEED !== "true") {
+    return NextResponse.json({ error: "Seed deshabilitado" }, { status: 403 });
+  }
+
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
   try {
-    const supabase = await createAdminClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user || user.email?.toLowerCase() !== adminEmail?.toLowerCase()) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-
-    await supabase.from("projects").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-
+    const supabase = createAdminClient();
+    await supabase
+      .from("projects")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000");
+    revalidatePath("/");
+    revalidatePath("/proyectos");
     return NextResponse.json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error desconocido";
