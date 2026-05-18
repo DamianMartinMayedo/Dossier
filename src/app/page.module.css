@@ -7,7 +7,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: end;
-  margin: var(--space-24) 0;
+  margin: var(--space-16) 0;
   padding-inline: var(--space-4);
   max-width: var(--content-wide);
   margin-inline: auto;
@@ -342,7 +342,7 @@
 }
 
 .contactSection {
-  padding-block: clamp(var(--space-16), 10vw, var(--space-24));
+  padding-block: clamp(var(--space-8), 5vw, var(--space-16));
 }
 
 .contactInner {

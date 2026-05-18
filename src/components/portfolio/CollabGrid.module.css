@@ -52,13 +52,21 @@
   max-width: 220px;
   object-fit: contain;
   mix-blend-mode: multiply;
+  filter: grayscale(1);
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.item:hover .logo {
+  filter: grayscale(0);
+  transform: scale(1.1);
 }
 
 [data-theme="dark"] .logo {
   mix-blend-mode: screen;
-  filter: invert(1);
+  filter: grayscale(1);
 }
 
 [data-theme="dark"] .item:hover .logo {
-  filter: invert(1);
+  filter: grayscale(0);
+  transform: scale(1.1);
 }

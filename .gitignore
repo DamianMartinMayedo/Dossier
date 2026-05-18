@@ -44,3 +44,8 @@ next-env.d.ts
 /public/assets/
 public/assets
 
+# personal / docs no checkeados
+/cvs/
+/mis CVs/
+/.docs/
+
