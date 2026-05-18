@@ -27,19 +27,17 @@ export default async function SobreMi() {
   return (
     <div className={styles.page}>
       <section className={styles.section}>
-        {profile.avatar && (
-          <div className={styles.avatar}>
-            <Image
-              src={profile.avatar}
-              alt={profile.name}
-              width={120}
-              height={120}
-              className={styles.avatarImg}
-            />
-          </div>
-        )}
-        <h1 className={styles.name}>{profile.name}</h1>
-        <p className={styles.bio}>{profile.bio}</p>
+        <div className={styles.avatar}>
+          <Image
+            src={profile?.avatar || "/foto_perfil.jpg"}
+            alt={profile?.name || "Damián Martín"}
+            width={120}
+            height={120}
+            className={styles.avatarImg}
+          />
+        </div>
+        <h1 className={styles.name}>{profile?.name || "Damián Martín"}</h1>
+        <p className={styles.bio}>{profile?.bio}</p>
 
         {profile.skills && profile.skills.length > 0 && (
           <div className={styles.skills}>
