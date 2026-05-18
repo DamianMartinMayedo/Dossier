@@ -1,0 +1,34 @@
+.dot {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+}
+
+.dotInner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-text);
+  transform: translate(-50%, -50%);
+}
+
+.ring {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-text);
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, opacity 0.2s;
+  opacity: 0.3;
+}
+
+@media (hover: none) {
+  .dot,
+  .ring {
+    display: none !important;
+  }
+}

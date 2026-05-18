@@ -1,0 +1,110 @@
+.card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform var(--transition-interactive);
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.image {
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow var(--transition-interactive);
+}
+
+.card:hover .image {
+  box-shadow: var(--shadow-md);
+}
+
+.imageInner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    145deg,
+    var(--color-surface-offset) 0%,
+    var(--color-surface-dynamic) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--color-text-muted);
+  opacity: 0.45;
+  transition: opacity var(--transition-interactive);
+}
+
+.card:hover .imageInner {
+  opacity: 0.7;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in oklch, var(--color-text) 0%, transparent);
+  transition: background var(--transition-interactive);
+  border-radius: var(--radius-lg);
+}
+
+.card:hover .overlay {
+  background: color-mix(in oklch, var(--color-text) 8%, transparent);
+}
+
+.arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  opacity: 0;
+  transform: scale(0.8);
+  box-shadow: var(--shadow-md);
+  transition: opacity var(--transition-interactive),
+    transform var(--transition-interactive);
+}
+
+.card:hover .arrow {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.name {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.type {
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

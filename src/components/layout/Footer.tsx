@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
@@ -11,9 +12,19 @@ export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
-        <p className={styles.copy}>
-          &copy; {new Date().getFullYear()} Damián Martín
-        </p>
+        <span className={styles.copy}>
+          © 2026 Damián Martín · Sevilla
+        </span>
+        <div className={styles.links}>
+          <a href="mailto:damianmartinmayedo@gmail.com">Email</a>
+          <a
+            href="https://linkedin.com/in/damian-martin"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            LinkedIn
+          </a>
+        </div>
       </div>
     </footer>
   );

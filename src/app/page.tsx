@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import ProjectGrid from "@/components/portfolio/ProjectGrid";
+import ProjectCard from "@/components/portfolio/ProjectCard";
+import ProjectCardMinimal from "@/components/portfolio/ProjectCardMinimal";
+import Marquee from "@/components/portfolio/Marquee";
+import CollabGrid from "@/components/portfolio/CollabGrid";
+import Cursor from "@/components/ui/Cursor";
 import styles from "./page.module.css";
 
 export default async function Home() {
@@ -10,22 +14,176 @@ export default async function Home() {
     .select("*")
     .order("order", { ascending: true });
 
+  const principales = (projects || []).filter((p) => p.category === "principal");
+  const secundarios = (projects || []).filter((p) => p.category === "secundario");
+
   return (
-    <div className={styles.page}>
-      <section className={styles.hero}>
-        <h1 className={styles.title}>
-          Diseño digital
-          <br />
-          con propósito
-        </h1>
-        <p className={styles.subtitle}>
-          Portfolio de Damián Martín — UI/UX, branding y producto digital.
-        </p>
+    <>
+      <Cursor />
+
+      {/* HERO */}
+      <section className={styles.heroSection}>
+        <div className={styles.hero}>
+          <div className={styles.heroLeft}>
+            <p className={styles.eyebrow}>
+              <span className={styles.dot} />
+              Disponible para proyectos
+            </p>
+            <h1 className={styles.name}>
+              Product
+              <br />
+              <span>Designer</span>
+            </h1>
+            <p className={styles.descriptor}>
+              UI/UX, branding y ecosistemas digitales de principio a fin. Con base en Sevilla, trabajo con equipos y clientes globales.
+            </p>
+            <div className={styles.ctaRow}>
+              <a href="#proyectos" className={styles.btnPrimary}>
+                Ver proyectos <span>↓</span>
+              </a>
+              <a href="#contacto" className={styles.btnSecondary}>
+                Hablemos
+              </a>
+            </div>
+          </div>
+          <div className={styles.heroRight}>
+            <div className={styles.bigNumber}>10+</div>
+            <div className={styles.stats}>
+              <div className={styles.stat}>
+                <span className={styles.statNum}>8+</span>
+                <span className={styles.statLabel}>años de experiencia</span>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.statNum}>30+</span>
+                <span className={styles.statLabel}>proyectos entregados</span>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.statNum}>3</span>
+                <span className={styles.statLabel}>co-fundaciones</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className={styles.portfolio}>
-        <ProjectGrid projects={projects || []} />
+      {/* MARQUEE */}
+      <Marquee />
+
+      {/* PROYECTOS */}
+      <section className="section" id="proyectos">
+        <div className="container-wide">
+          <p className="section-label">Proyectos seleccionados</p>
+          <h2 className="section-title">Trabajo destacado</h2>
+
+          <div className={styles.grid}>
+            {principales.slice(0, 4).map((p, i) => (
+              <ProjectCard
+                key={p.id}
+                project={p}
+                featured={i === 0}
+                span={i === 0 ? 8 : i === 1 ? 4 : 6}
+              />
+            ))}
+          </div>
+
+          {principales.length === 0 && (
+            <p style={{ color: "var(--color-text-muted)", textAlign: "center", padding: "var(--space-16) 0" }}>
+              Los proyectos aparecerán aquí cuando los añadas desde el panel admin.
+            </p>
+          )}
+
+          {secundarios.length > 0 && (
+            <>
+              <div className={styles.separator}>
+                <div className={styles.sepLine} />
+                <span className={styles.sepText}>Otros proyectos</span>
+                <div className={styles.sepLine} />
+              </div>
+
+              <div className={styles.gridMinimal}>
+                {secundarios.slice(0, 4).map((p) => (
+                  <ProjectCardMinimal key={p.id} project={p} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </section>
-    </div>
+
+      {/* COLABORACIONES */}
+      <CollabGrid />
+
+      {/* SOBRE MÍ */}
+      <section className="section" id="sobre">
+        <div className="container">
+          <p className="section-label">Sobre mí</p>
+          <div className={styles.aboutGrid}>
+            <div>
+              <h2 className={styles.aboutTitle}>
+                Diseñador con visión de{" "}
+                <em>producto</em>
+              </h2>
+              <p className={styles.aboutText}>
+                Licenciado en Diseño de Comunicación Visual y Máster en Diseño Gráfico y Multimedia. He liderado proyectos end-to-end desde la investigación hasta el lanzamiento, colaborando con equipos de producto, desarrollo y marketing.
+              </p>
+              <p className={styles.aboutText}>
+                Mi enfoque une rigor analítico y sensibilidad visual: identifico problemas reales de usuario y los resuelvo con interfaces que también son bellas.
+              </p>
+              <a href="#contacto" className={styles.arrowLink}>
+                Hablemos <span>→</span>
+              </a>
+            </div>
+            <div className={styles.aboutCards}>
+              <div className={styles.aboutCard}>
+                <p className={styles.cardLabel}>Formación</p>
+                <p className={styles.cardTitle}>Lic. Diseño de Comunicación Visual</p>
+                <p className={styles.cardSub}>Universidad de La Habana</p>
+              </div>
+              <div className={styles.aboutCard}>
+                <p className={styles.cardLabel}>Máster</p>
+                <p className={styles.cardTitle}>Diseño Gráfico y Multimedia</p>
+                <p className={styles.cardSub}>Escuela Superior de Informática · CIPSA</p>
+              </div>
+              <div className={styles.aboutCard}>
+                <p className={styles.cardLabel}>Idiomas</p>
+                <p className={styles.cardSub}>Español nativo · Inglés intermedio</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTACTO */}
+      <section className={styles.contactSection} id="contacto">
+        <div className={styles.contactInner}>
+          <span className={`${styles.badge} ${styles.badgePrimary}`}>
+            Disponible para proyectos
+          </span>
+          <h2 className={styles.contactHeadline}>
+            ¿Tienes un proyecto
+            <br />
+            en <em>mente</em>?
+          </h2>
+          <p className={styles.contactSub}>
+            Escríbeme directamente. Respondo en menos de 24h.
+          </p>
+          <a className={styles.contactEmail} href="mailto:damianmartinmayedo@gmail.com">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            damianmartinmayedo@gmail.com
+          </a>
+          <div className={styles.contactCta}>
+            <a href="https://damianmartin.es" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
+              Ver portfolio <span>↗</span>
+            </a>
+            <a href="https://linkedin.com/in/damian-martin" target="_blank" rel="noopener noreferrer" className={styles.btnSecondary}>
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
