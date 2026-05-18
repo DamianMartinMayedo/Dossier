@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
-import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/utils";
 import type { Project, ProjectFormData } from "@/types";
 import styles from "./ProjectForm.module.css";
@@ -127,21 +125,13 @@ export default function ProjectForm({ project }: Props) {
   }
 
   async function uploadFile(file: File): Promise<string> {
-    const supabase = createClient();
-    const ext = file.name.split(".").pop() || "jpg";
-    const fileName = `${uuidv4()}.${ext}`;
+    const fd = new FormData();
+    fd.append("file", file);
 
-    const { error: uploadError } = await supabase.storage
-      .from("projects")
-      .upload(fileName, file);
-
-    if (uploadError) throw uploadError;
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("projects").getPublicUrl(fileName);
-
-    return publicUrl;
+    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Error al subir imagen");
+    return data.url as string;
   }
 
   async function deleteStorageFiles(urls: string[]) {
@@ -150,8 +140,11 @@ export default function ProjectForm({ project }: Props) {
       .map(pathFromPublicUrl)
       .filter((p): p is string => Boolean(p));
     if (paths.length === 0) return;
-    const supabase = createClient();
-    await supabase.storage.from("projects").remove(paths);
+    await fetch("/api/admin/upload", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paths }),
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
