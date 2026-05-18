@@ -1,12 +1,18 @@
+import Image from "next/image";
 import styles from "./CollabGrid.module.css";
 
-const COMPANIES = [
-  { name: "Ciclogreen", role: "App · UX Redesign", color: "#27AE60" },
-  { name: "Próxima Energía", role: "Web · Landings", color: "#E67E22" },
-  { name: "Iwantic", role: "UI · Branding", color: "#2980B9" },
-  { name: "Mandao", role: "Ecosistema · 3 Apps", color: "#F1C40F" },
-  { name: "MissCar", role: "App · Web · CRO", color: "#C0392B" },
-  { name: "Emergya", role: "UX · INAP", color: "#8E44AD" },
+const LOGOS = [
+  { src: "/assets/empresas/Barrabes.png", name: "Barrabes" },
+  { src: "/assets/empresas/Mandao.png", name: "Mandao" },
+  { src: "/assets/empresas/ciclogreen.png", name: "Ciclogreen" },
+  { src: "/assets/empresas/iwantic.png", name: "Iwantic" },
+  { src: "/assets/empresas/iwantpro.png", name: "Iwantpro" },
+  { src: "/assets/empresas/mapodec.png", name: "Mapodec" },
+  { src: "/assets/empresas/migallon.png", name: "Migallon" },
+  { src: "/assets/empresas/proxima.png", name: "Próxima Energía" },
+  { src: "/assets/empresas/proxya.png", name: "Proxya" },
+  { src: "/assets/empresas/starenlared.png", name: "Starenlared" },
+  { src: "/assets/empresas/transformacion digital.png", name: "Transformación Digital" },
 ];
 
 export default function CollabGrid() {
@@ -21,16 +27,15 @@ export default function CollabGrid() {
           </p>
         </div>
         <div className={styles.grid}>
-          {COMPANIES.map((c) => (
-            <div key={c.name} className={styles.item}>
-              <span
-                className={styles.logoPlaceholder}
-                style={{ borderColor: c.color, color: c.color }}
-              >
-                {c.name.slice(0, 2).toUpperCase()}
-              </span>
-              <span className={styles.name}>{c.name}</span>
-              <span className={styles.role}>{c.role}</span>
+          {LOGOS.map((logo) => (
+            <div key={logo.name} className={styles.item}>
+              <Image
+                src={logo.src}
+                alt={logo.name}
+                width={120}
+                height={40}
+                className={styles.logo}
+              />
             </div>
           ))}
         </div>

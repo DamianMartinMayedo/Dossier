@@ -13,7 +13,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <span className={styles.copy}>
-          © 2026 Damián Martín · Sevilla
+          © 2026 Damián Martín
         </span>
         <div className={styles.links}>
           <a href="mailto:damianmartinmayedo@gmail.com">Email</a>

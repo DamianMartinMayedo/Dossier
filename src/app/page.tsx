@@ -27,7 +27,7 @@ export default async function Home() {
           <div className={styles.heroLeft}>
             <p className={styles.eyebrow}>
               <span className={styles.dot} />
-              Disponible para proyectos
+              Trabajemos juntos
             </p>
             <h1 className={styles.name}>
               Product
@@ -72,8 +72,15 @@ export default async function Home() {
       {/* PROYECTOS */}
       <section className="section" id="proyectos">
         <div className="container-wide">
-          <p className="section-label">Proyectos seleccionados</p>
-          <h2 className="section-title">Trabajo destacado</h2>
+          <div className={styles.projectsHeader}>
+            <div>
+              <p className="section-label">Proyectos seleccionados</p>
+              <h2 className="section-title">Trabajo destacado</h2>
+            </div>
+            <a href="/proyectos" className={styles.btnSecondary}>
+              Ver todos <span>→</span>
+            </a>
+          </div>
 
           <div className={styles.grid}>
             {principales.slice(0, 4).map((p, i) => (
@@ -157,7 +164,7 @@ export default async function Home() {
       <section className={styles.contactSection} id="contacto">
         <div className={styles.contactInner}>
           <span className={`${styles.badge} ${styles.badgePrimary}`}>
-            Disponible para proyectos
+            Trabajemos juntos
           </span>
           <h2 className={styles.contactHeadline}>
             ¿Tienes un proyecto
@@ -175,11 +182,11 @@ export default async function Home() {
             damianmartinmayedo@gmail.com
           </a>
           <div className={styles.contactCta}>
-            <a href="https://damianmartin.es" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
-              Ver portfolio <span>↗</span>
+            <a href="https://wa.me/34674341489" target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
+              WhatsApp <span>↗</span>
             </a>
-            <a href="https://linkedin.com/in/damian-martin" target="_blank" rel="noopener noreferrer" className={styles.btnSecondary}>
-              LinkedIn
+            <a href="mailto:damianmartinmayedo@gmail.com" className={styles.btnSecondary}>
+              Email
             </a>
           </div>
         </div>
