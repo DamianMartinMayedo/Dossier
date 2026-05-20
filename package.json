@@ -3,12 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
+    "dev:clean": "rm -rf .next && next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "optimize-images": "tsx scripts/optimize-images.ts",
-    "seed-images": "tsx scripts/seed-images.ts"
+    "seed-images": "tsx scripts/seed-images.ts",
+    "seed-content": "tsx scripts/seed-content.ts",
+    "seed-secundarios": "tsx scripts/seed-secundarios.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

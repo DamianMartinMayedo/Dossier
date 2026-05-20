@@ -1,9 +1,12 @@
 .heroSection {
+  position: relative;
   background: var(--color-bg);
+  overflow: hidden;
 }
 
 .hero {
-
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: end;
@@ -217,6 +220,14 @@
   margin-bottom: var(--space-12);
   flex-wrap: wrap;
   gap: var(--space-4);
+}
+
+/* El .section-title global tiene margin-bottom: var(--space-8) que descoloca
+   el flex-end del header — el botón "Ver todos" queda a la altura del título
+   pero el título flota arriba. Override local: sin margin-bottom dentro del
+   header. El espaciado vertical lo da el padre con margin-bottom del header. */
+.projectsHeader :global(.section-title) {
+  margin-bottom: 0;
 }
 
 .aboutGrid {

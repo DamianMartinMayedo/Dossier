@@ -1,13 +1,20 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import styles from "./Cursor.module.css";
 
 export default function Cursor() {
+  const pathname = usePathname();
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
 
+  // Don't show the custom cursor in admin area — keeps the editor experience
+  // clean with the native cursor.
+  const isAdmin = pathname?.startsWith("/admin");
+
   useEffect(() => {
+    if (isAdmin) return;
     // Skip on touch / pointer-coarse devices — CSS `@media (hover: none)` hides
     // the elements but the RAF loop would keep running without this guard.
     if (window.matchMedia("(hover: none)").matches) return;
@@ -60,7 +67,9 @@ export default function Cursor() {
     return () => {
       document.removeEventListener("mousemove", handleMove);
     };
-  }, []);
+  }, [isAdmin]);
+
+  if (isAdmin) return null;
 
   return (
     <>

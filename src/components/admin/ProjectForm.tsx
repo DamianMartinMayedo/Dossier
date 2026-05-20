@@ -1,25 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/utils";
-import type { Project, ProjectFormData } from "@/types";
+import type { ContentBlock, Project, ProjectFormData } from "@/types";
+import { deleteAdminFiles } from "@/lib/admin-upload";
+import Dropzone from "./Dropzone";
+import { useFileUpload } from "./useFileUpload";
+import ProjectMetaPanel from "./ProjectMetaPanel";
+import ContentEditor from "./ContentEditor";
 import styles from "./ProjectForm.module.css";
 
 interface Props {
   project?: Project;
-}
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const MAX_GALLERY_IMAGES = 12;
-const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"];
-
-function pathFromPublicUrl(url: string): string | null {
-  const marker = "/storage/v1/object/public/projects/";
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  return url.slice(idx + marker.length);
 }
 
 export default function ProjectForm({ project }: Props) {
@@ -31,6 +25,7 @@ export default function ProjectForm({ project }: Props) {
     slug: project?.slug || "",
     category: project?.category || "principal",
     description: project?.description || "",
+    subtitle: project?.subtitle || "",
     services: project?.services.join(", ") || "",
     client: project?.client || "",
     year: project?.year || "",
@@ -38,113 +33,36 @@ export default function ProjectForm({ project }: Props) {
     order: project?.order || 0,
   });
 
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>(project?.images || []);
-  const [removedImages, setRemovedImages] = useState<string[]>([]);
+  const [coverImage, setCoverImage] = useState<string | null>(project?.cover_image ?? null);
+  const [headerImage, setHeaderImage] = useState<string | null>(project?.header_image ?? null);
+  const [content, setContent] = useState<ContentBlock[]>(project?.content ?? []);
+  const headerUpload = useFileUpload();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const newGalleryPreviews = useMemo(
-    () => galleryFiles.map((f) => URL.createObjectURL(f)),
-    [galleryFiles]
-  );
-
-  useEffect(() => {
-    if (!coverFile) {
-      setCoverPreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(coverFile);
-    setCoverPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [coverFile]);
-
-  useEffect(() => {
-    return () => newGalleryPreviews.forEach((u) => URL.revokeObjectURL(u));
-  }, [newGalleryPreviews]);
-
-  function updateField<K extends keyof ProjectFormData>(
-    key: K,
-    value: ProjectFormData[K]
-  ) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    if (key === "title" && !isEditing) {
-      setForm((prev) => ({ ...prev, slug: slugify(value as string) }));
-    }
-  }
-
-  function validateFile(file: File): string | null {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return `Tipo no permitido: ${file.name}. Usa PNG, JPG, WebP, GIF o SVG.`;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return `${file.name} pesa más de 10 MB.`;
-    }
-    return null;
-  }
-
-  function onCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] || null;
-    if (file) {
-      const err = validateFile(file);
-      if (err) {
-        setError(err);
-        e.target.value = "";
-        return;
+  function updateField<K extends keyof ProjectFormData>(key: K, value: ProjectFormData[K]) {
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+      // Auto-slug on title change for new projects.
+      if (key === "title" && !isEditing) {
+        next.slug = slugify(value as string);
       }
-    }
-    setError("");
-    setCoverFile(file);
-  }
-
-  function onGalleryChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || []);
-    for (const f of files) {
-      const err = validateFile(f);
-      if (err) {
-        setError(err);
-        e.target.value = "";
-        return;
+      // When moving to secundario, force featured = false and clear principal-only fields.
+      if (key === "category" && value === "secundario") {
+        next.featured = false;
       }
-    }
-    const totalCount = existingImages.length + files.length;
-    if (totalCount > MAX_GALLERY_IMAGES) {
-      setError(`Máximo ${MAX_GALLERY_IMAGES} imágenes en la galería.`);
-      e.target.value = "";
-      return;
-    }
-    setError("");
-    setGalleryFiles(files);
-  }
-
-  function removeExistingImage(url: string) {
-    setExistingImages((prev) => prev.filter((u) => u !== url));
-    setRemovedImages((prev) => [...prev, url]);
-  }
-
-  async function uploadFile(file: File): Promise<string> {
-    const fd = new FormData();
-    fd.append("file", file);
-
-    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? "Error al subir imagen");
-    return data.url as string;
-  }
-
-  async function deleteStorageFiles(urls: string[]) {
-    if (urls.length === 0) return;
-    const paths = urls
-      .map(pathFromPublicUrl)
-      .filter((p): p is string => Boolean(p));
-    if (paths.length === 0) return;
-    await fetch("/api/admin/upload", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paths }),
+      return next;
     });
+  }
+
+  async function handleHeaderImage(files: File[]) {
+    if (files.length === 0) return;
+    try {
+      const [url] = await headerUpload.upload([files[0]]);
+      setHeaderImage(url);
+    } catch {
+      // error en headerUpload.error
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -153,36 +71,26 @@ export default function ProjectForm({ project }: Props) {
     setError("");
 
     try {
-      let coverImage = project?.cover_image || null;
-
-      if (coverFile) {
-        if (project?.cover_image) {
-          await deleteStorageFiles([project.cover_image]);
-        }
-        coverImage = await uploadFile(coverFile);
-      }
-
-      let images = [...existingImages];
-      if (galleryFiles.length > 0) {
-        const newUrls = await Promise.all(galleryFiles.map(uploadFile));
-        images = [...images, ...newUrls];
-      }
-
       const payload = {
         ...(isEditing ? { id: project.id } : {}),
         title: form.title,
         slug: form.slug,
         category: form.category,
         description: form.description,
+        subtitle: form.category === "principal" ? form.subtitle : null,
         cover_image: coverImage,
-        images,
+        header_image: form.category === "principal" ? headerImage : null,
+        // Sólo enviamos `content` para principales; en secundarios lo dejamos a []
+        content: form.category === "principal" ? content : [],
+        // El campo legacy `images` se queda como estaba (sin tocar)
+        images: project?.images ?? [],
         services: form.services
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
         client: form.client || null,
         year: form.year || null,
-        featured: form.featured,
+        featured: form.category === "principal" ? form.featured : false,
         order: form.order,
       };
 
@@ -194,10 +102,6 @@ export default function ProjectForm({ project }: Props) {
 
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Error al guardar");
-
-      if (removedImages.length > 0) {
-        await deleteStorageFiles(removedImages);
-      }
 
       router.push("/admin/proyectos");
       router.refresh();
@@ -211,10 +115,7 @@ export default function ProjectForm({ project }: Props) {
   async function handleDelete() {
     if (!project || !confirm("¿Eliminar este proyecto? Se borrarán también sus imágenes.")) return;
 
-    const res = await fetch(`/api/admin/projects?id=${project.id}`, {
-      method: "DELETE",
-    });
-
+    const res = await fetch(`/api/admin/projects?id=${project.id}`, { method: "DELETE" });
     if (!res.ok) {
       const result = await res.json();
       alert(result.error || "Error al eliminar");
@@ -223,224 +124,125 @@ export default function ProjectForm({ project }: Props) {
 
     const urlsToDelete = [
       ...(project.cover_image ? [project.cover_image] : []),
+      ...(project.header_image ? [project.header_image] : []),
       ...project.images,
     ];
-    await deleteStorageFiles(urlsToDelete);
+    await deleteAdminFiles(urlsToDelete);
 
     router.push("/admin/proyectos");
     router.refresh();
   }
 
+  const isPrincipal = form.category === "principal";
+
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
+    <form id="project-form" onSubmit={handleSubmit} className={styles.form}>
       {error && <p className={styles.error}>{error}</p>}
 
-      <div className={styles.field}>
-        <label className={styles.label}>Título</label>
-        <input
-          type="text"
-          value={form.title}
-          onChange={(e) => updateField("title", e.target.value)}
-          required
-          className={styles.input}
-        />
-      </div>
+      <div className={styles.layout}>
+        <main className={styles.main}>
+          {isPrincipal ? (
+            <>
+              <section className={styles.headerCard}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Subtítulo</label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={form.subtitle}
+                    onChange={(e) => updateField("subtitle", e.target.value)}
+                    placeholder="Diseño, liderazgo y ecosistema digital"
+                  />
+                  <p className={styles.hint}>
+                    Frase corta debajo del título en la página de detalle.
+                  </p>
+                </div>
 
-      <div className={styles.field}>
-        <label className={styles.label}>Slug</label>
-        <input
-          type="text"
-          value={form.slug}
-          onChange={(e) => updateField("slug", e.target.value)}
-          required
-          pattern="[a-z0-9-]+"
-          title="Solo minúsculas, números y guiones"
-          className={styles.input}
-        />
-      </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Imagen de cabecera (opcional)</label>
+                  {headerImage && (
+                    <div className={styles.headerPreview}>
+                      <Image
+                        src={headerImage}
+                        alt="Cabecera"
+                        fill
+                        sizes="(min-width: 960px) 600px, 100vw"
+                        className={styles.headerImg}
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                  <Dropzone
+                    onFiles={handleHeaderImage}
+                    disabled={headerUpload.uploading}
+                    label={headerImage ? "Reemplazar cabecera" : "Arrastra o pulsa para subir cabecera"}
+                    hint="Hero full-bleed arriba de la página. PNG, JPG, WebP, GIF o SVG. Máx 10 MB."
+                  />
+                  {headerUpload.uploading && <p className={styles.uploading}>Subiendo…</p>}
+                  {headerUpload.error && <p className={styles.errorInline}>{headerUpload.error}</p>}
+                  {headerImage && (
+                    <button
+                      type="button"
+                      className={styles.removeBtn}
+                      onClick={() => setHeaderImage(null)}
+                    >
+                      Quitar cabecera
+                    </button>
+                  )}
+                </div>
 
-      <div className={styles.field}>
-        <label className={styles.label}>Categoría</label>
-        <select
-          value={form.category}
-          onChange={(e) =>
-            updateField(
-              "category",
-              e.target.value as "principal" | "secundario"
-            )
-          }
-          className={styles.input}
-        >
-          <option value="principal">Principal</option>
-          <option value="secundario">Secundario</option>
-        </select>
-      </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Descripción (resumen corto)</label>
+                  <textarea
+                    className={styles.textarea}
+                    rows={3}
+                    value={form.description}
+                    onChange={(e) => updateField("description", e.target.value)}
+                    placeholder="Se usa como fallback si no hay bloques y en metadatos OG/SEO."
+                  />
+                </div>
+              </section>
 
-      <div className={styles.field}>
-        <label className={styles.label}>Descripción</label>
-        <textarea
-          value={form.description}
-          onChange={(e) => updateField("description", e.target.value)}
-          rows={4}
-          className={styles.textarea}
-        />
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label}>
-          Servicios (separados por coma)
-        </label>
-        <input
-          type="text"
-          value={form.services}
-          onChange={(e) => updateField("services", e.target.value)}
-          placeholder="UI/UX Design, Branding, Web"
-          className={styles.input}
-        />
-      </div>
-
-      <div className={styles.row}>
-        <div className={styles.field}>
-          <label className={styles.label}>Cliente</label>
-          <input
-            type="text"
-            value={form.client}
-            onChange={(e) => updateField("client", e.target.value)}
-            className={styles.input}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.label}>Año</label>
-          <input
-            type="text"
-            value={form.year}
-            onChange={(e) => updateField("year", e.target.value)}
-            className={styles.input}
-          />
-        </div>
-      </div>
-
-      <div className={styles.row}>
-        <div className={styles.field}>
-          <label className={styles.label}>Orden</label>
-          <input
-            type="number"
-            value={form.order}
-            onChange={(e) =>
-              updateField("order", parseInt(e.target.value) || 0)
-            }
-            className={styles.input}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.checkLabel}>
-            <input
-              type="checkbox"
-              checked={form.featured}
-              onChange={(e) => updateField("featured", e.target.checked)}
-              className={styles.checkbox}
-            />
-            Destacado
-          </label>
-        </div>
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label}>Imagen de portada</label>
-        {(coverPreview || project?.cover_image) && (
-          <div className={styles.coverPreview}>
-            <Image
-              src={coverPreview || project!.cover_image!}
-              alt="Portada"
-              width={320}
-              height={200}
-              className={styles.previewImg}
-              unoptimized
-            />
-          </div>
-        )}
-        <input
-          type="file"
-          accept={ALLOWED_TYPES.join(",")}
-          onChange={onCoverChange}
-          className={styles.fileInput}
-        />
-        <p className={styles.hint}>PNG, JPG, WebP, GIF o SVG. Máx 10 MB.</p>
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label}>Galería</label>
-        {existingImages.length > 0 && (
-          <div className={styles.gallery}>
-            {existingImages.map((url) => (
-              <div key={url} className={styles.galleryItem}>
-                <Image
-                  src={url}
-                  alt=""
-                  width={120}
-                  height={90}
-                  className={styles.galleryImg}
-                  unoptimized
+              <ContentEditor blocks={content} onChange={setContent} />
+            </>
+          ) : (
+            <section className={styles.headerCard}>
+              <div className={styles.field}>
+                <label className={styles.label}>Descripción (opcional)</label>
+                <textarea
+                  className={styles.textarea}
+                  rows={4}
+                  value={form.description}
+                  onChange={(e) => updateField("description", e.target.value)}
+                  placeholder="Texto opcional sobre el proyecto secundario."
                 />
-                <button
-                  type="button"
-                  onClick={() => removeExistingImage(url)}
-                  className={styles.galleryRemove}
-                  aria-label="Quitar imagen"
-                >
-                  ×
-                </button>
               </div>
-            ))}
-          </div>
-        )}
-        {newGalleryPreviews.length > 0 && (
-          <div className={styles.gallery}>
-            {newGalleryPreviews.map((url, i) => (
-              <div key={url} className={styles.galleryItem}>
-                <Image
-                  src={url}
-                  alt=""
-                  width={120}
-                  height={90}
-                  className={styles.galleryImg}
-                  unoptimized
-                />
-                <span className={styles.newBadge}>Nueva {i + 1}</span>
-              </div>
-            ))}
-          </div>
-        )}
-        <input
-          type="file"
-          accept={ALLOWED_TYPES.join(",")}
-          multiple
-          onChange={onGalleryChange}
-          className={styles.fileInput}
-        />
-        <p className={styles.hint}>
-          Hasta {MAX_GALLERY_IMAGES} imágenes en total (actualmente{" "}
-          {existingImages.length + galleryFiles.length}).
-        </p>
+              <p className={styles.secondaryNote}>
+                Los proyectos secundarios no tienen página propia. Sólo aparecen como tarjeta en
+                /proyectos y se amplían en un lightbox al hacer click sobre el cover.
+              </p>
+            </section>
+          )}
+        </main>
+
+        <aside className={styles.sidebar}>
+          <ProjectMetaPanel
+            form={form}
+            isEditing={isEditing}
+            hasContent={content.length > 0}
+            coverUrl={coverImage}
+            onUpdate={updateField}
+            onCoverChange={setCoverImage}
+          />
+        </aside>
       </div>
 
       <div className={styles.buttons}>
-        <button type="submit" disabled={loading} className={styles.submitBtn}>
-          {loading
-            ? "Guardando..."
-            : isEditing
-              ? "Actualizar"
-              : "Crear proyecto"}
+        <button type="submit" form="project-form" disabled={loading} className={styles.submitBtn}>
+          {loading ? "Guardando…" : isEditing ? "Actualizar" : "Crear proyecto"}
         </button>
-
         {isEditing && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className={styles.deleteBtn}
-          >
+          <button type="button" form="project-form" onClick={handleDelete} className={styles.deleteBtn}>
             Eliminar
           </button>
         )}

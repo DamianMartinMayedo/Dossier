@@ -1,4 +1,5 @@
-import type { Project } from "@/types";
+import type { ContentBlock, Project } from "@/types";
+import { isValidContent } from "@/lib/blocks";
 
 /**
  * Returns the best URL to use as the project cover image.
@@ -37,8 +38,11 @@ export interface ProjectPayload {
   slug: string;
   category: "principal" | "secundario";
   description?: string;
+  subtitle?: string | null;
   cover_image?: string | null;
+  header_image?: string | null;
   images?: string[];
+  content?: ContentBlock[];
   services?: string[];
   client?: string | null;
   year?: string | null;
@@ -67,6 +71,17 @@ export function validateProjectPayload(
     return { ok: false, error: "Categoría debe ser 'principal' o 'secundario'" };
   }
 
+  // Content blocks (sólo principales pueden tenerlos; en secundarios se ignora).
+  let content: ContentBlock[] = [];
+  if (p.category === "principal") {
+    if (p.content !== undefined && p.content !== null) {
+      if (!isValidContent(p.content)) {
+        return { ok: false, error: "El contenido de bloques está malformado" };
+      }
+      content = p.content;
+    }
+  }
+
   return {
     ok: true,
     data: {
@@ -74,12 +89,22 @@ export function validateProjectPayload(
       slug: p.slug.trim(),
       category: p.category,
       description: typeof p.description === "string" ? p.description : "",
+      subtitle:
+        p.category === "principal" && typeof p.subtitle === "string" && p.subtitle.length > 0
+          ? p.subtitle
+          : null,
       cover_image: typeof p.cover_image === "string" ? p.cover_image : null,
+      header_image:
+        p.category === "principal" && typeof p.header_image === "string" && p.header_image.length > 0
+          ? p.header_image
+          : null,
       images: Array.isArray(p.images) ? p.images.filter((x): x is string => typeof x === "string") : [],
+      content,
       services: Array.isArray(p.services) ? p.services.filter((x): x is string => typeof x === "string") : [],
       client: typeof p.client === "string" && p.client.length > 0 ? p.client : null,
       year: typeof p.year === "string" && p.year.length > 0 ? p.year : null,
-      featured: Boolean(p.featured),
+      // Secundarios nunca van a home.
+      featured: p.category === "principal" ? Boolean(p.featured) : false,
       order: typeof p.order === "number" ? p.order : 0,
     },
   };

@@ -14,42 +14,40 @@ export default async function AdminMensajes() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="container">
-      <div className={styles.page}>
-        <p className="section-label">Contacto</p>
-        <h1 className={styles.title}>Mensajes</h1>
+    <div className={styles.page}>
+      <p className="section-label">Contacto</p>
+      <h1 className={styles.title}>Mensajes</h1>
 
-        {!messages || messages.length === 0 ? (
-          <p className={styles.empty}>No hay mensajes aún.</p>
-        ) : (
-          <div className={styles.list}>
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`${styles.message} ${!msg.read ? styles.unread : ""}`}
-              >
-                <div className={styles.msgHeader}>
-                  <div>
-                    <span className={styles.msgName}>{msg.name}</span>
-                    <span className={styles.msgEmail}>{msg.email}</span>
-                  </div>
-                  <span className={styles.msgDate}>
-                    {formatDate(msg.created_at)}
-                  </span>
+      {!messages || messages.length === 0 ? (
+        <p className={styles.empty}>No hay mensajes aún.</p>
+      ) : (
+        <div className={styles.list}>
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`${styles.message} ${!msg.read ? styles.unread : ""}`}
+            >
+              <div className={styles.msgHeader}>
+                <div>
+                  <span className={styles.msgName}>{msg.name}</span>
+                  <span className={styles.msgEmail}>{msg.email}</span>
                 </div>
-                <p className={styles.msgBody}>{msg.message}</p>
-                <MessagesActions
-                  messageId={msg.id}
-                  read={msg.read}
-                  email={msg.email}
-                  name={msg.name}
-                  originalMessage={msg.message}
-                />
+                <span className={styles.msgDate}>
+                  {formatDate(msg.created_at)}
+                </span>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <p className={styles.msgBody}>{msg.message}</p>
+              <MessagesActions
+                messageId={msg.id}
+                read={msg.read}
+                email={msg.email}
+                name={msg.name}
+                originalMessage={msg.message}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,3 +1,9 @@
+.page {
+  max-width: 1100px;
+  margin-inline: auto;
+  width: 100%;
+}
+
 .title {
   font-size: var(--text-xl);
   font-weight: 700;
@@ -20,6 +26,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  color: inherit;
+  text-decoration: none;
   transition: border-color var(--transition-interactive);
 }
 
@@ -30,6 +38,7 @@
 .number {
   font-size: var(--text-2xl);
   font-weight: 700;
+  color: var(--color-text);
 }
 
 .label {
@@ -49,52 +58,10 @@
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 500;
+  text-decoration: none;
   transition: opacity var(--transition-interactive);
 }
 
 .actionBtn:hover {
   opacity: 0.85;
-}
-
-.seedSection {
-  margin-top: var(--space-12);
-  padding-top: var(--space-8);
-  border-top: 1px solid var(--color-divider);
-}
-
-.seedLabel {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  margin-bottom: var(--space-3);
-  color: var(--color-text-muted);
-}
-
-.seedBtn {
-  padding: var(--space-3) var(--space-6);
-  background: var(--color-surface-offset-2);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  transition: all var(--transition-interactive);
-}
-
-.seedBtn:hover:not(:disabled) {
-  background: var(--color-surface-dynamic);
-  border-color: var(--color-text);
-}
-
-.seedBtn:disabled {
-  opacity: 0.6;
-}
-
-.seedMsg {
-  margin-top: var(--space-3);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-.seedError {
-  color: var(--color-error);
 }

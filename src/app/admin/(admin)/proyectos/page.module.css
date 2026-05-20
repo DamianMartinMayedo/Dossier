@@ -1,3 +1,9 @@
+.page {
+  max-width: 1100px;
+  margin-inline: auto;
+  width: 100%;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -18,6 +24,7 @@
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 500;
+  text-decoration: none;
   transition: opacity var(--transition-interactive);
 }
 
@@ -28,6 +35,17 @@
 .empty {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+}
+
+.empty a {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border);
+  text-underline-offset: 4px;
+}
+
+.empty a:hover {
+  text-decoration-color: var(--color-text);
 }
 
 .list {
@@ -45,6 +63,8 @@
   align-items: center;
   padding: var(--space-5) var(--space-6);
   background: var(--color-bg);
+  color: inherit;
+  text-decoration: none;
   transition: background var(--transition-interactive);
 }
 

@@ -8,7 +8,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const { data: projects } = await supabase
     .from("projects")
-    .select("slug, updated_at")
+    .select("slug, updated_at, category")
+    .eq("category", "principal")
     .order("order", { ascending: true });
 
   const staticPages: MetadataRoute.Sitemap = [

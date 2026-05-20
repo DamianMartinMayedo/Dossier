@@ -1,0 +1,118 @@
+/* ── Carrusel marquee infinito ────────────────────────────
+ *
+ * Estrategia: duplicamos las imágenes en el TSX y animamos el track
+ * con translateX(-50%) — al llegar a la mitad, el contenido visible
+ * coincide pixel-perfect con el inicio, así el loop es invisible.
+ *
+ * Pausa al hover/focus para que se puedan ver bien las imágenes.
+ * Respeta prefers-reduced-motion deteniendo la animación.
+ */
+
+.wrap {
+  width: 100%;
+  max-width: var(--content-default);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+.viewport {
+  width: 100%;
+  overflow: hidden;
+  /* Máscara suave en los bordes para que no se vea el corte abrupto. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--space-8),
+    black calc(100% - var(--space-8)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--space-8),
+    black calc(100% - var(--space-8)),
+    transparent
+  );
+}
+
+.track {
+  display: flex;
+  gap: var(--space-4);
+  width: max-content;
+  will-change: transform;
+  animation: marquee var(--marquee-duration, 30s) linear infinite;
+}
+
+.wrap:hover .track,
+.wrap:focus-within .track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* -50% es el ancho de UNA copia. Combinado con el gap, al duplicar
+       items, el desplazamiento es exactamente continuo. */
+    transform: translateX(calc(-50% - var(--space-4) / 2));
+  }
+}
+
+.item {
+  position: relative;
+  flex: 0 0 180px;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+}
+
+@media (min-width: 640px) {
+  .item {
+    flex: 0 0 240px;
+  }
+}
+
+.img {
+  object-fit: cover;
+}
+
+/* ── Variante embebida (dentro de TwoColumns) ─────────── */
+.embedded {
+  max-width: 100%;
+  padding-inline: 0;
+}
+
+.embedded .item {
+  flex: 0 0 140px;
+}
+
+@media (min-width: 640px) {
+  .embedded .item {
+    flex: 0 0 180px;
+  }
+}
+
+/* ── Accesibilidad: respeta el ajuste del usuario ─────── */
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+    /* Si el usuario prefiere menos movimiento, dejamos el carrusel
+       como scroll manual con snap, mostrando sólo la primera mitad. */
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .viewport {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .item {
+    scroll-snap-align: center;
+  }
+}

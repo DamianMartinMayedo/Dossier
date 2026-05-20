@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ThemeScript from "@/components/ui/ThemeScript";
+import Cursor from "@/components/ui/Cursor";
 import "./globals.css";
 
 const BASE_URL = "https://damianmartin.es";
@@ -67,6 +68,7 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body>
+        <Cursor />
         <Header />
         <main>{children}</main>
         <Footer />

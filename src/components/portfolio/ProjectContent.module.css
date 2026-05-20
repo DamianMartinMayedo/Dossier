@@ -1,0 +1,34 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-block: var(--space-4) var(--space-8);
+  /* Scope: bump local widths sin tocar tokens globales.
+     Estos overrides cascadean a los bloques hijos (HeadingBlock,
+     ParagraphBlock, ImageBlock, GalleryBlock, CarouselBlock, TwoColumnsBlock). */
+  --content-narrow: 760px;
+  --content-default: 1100px;
+}
+
+@media (min-width: 960px) {
+  .root {
+    gap: var(--space-6);
+  }
+}
+
+.slot {
+  width: 100%;
+}
+
+/* Heading seguido de paragraph: que queden pegados (la separación
+   normal del gap deja el título "flotando" lejos de su texto).
+   El gap es var(--space-5) → margen negativo equivalente para acercarlos. */
+.root > [data-block-type="heading"]:has(+ [data-block-type="paragraph"]) {
+  margin-bottom: calc(var(--space-3) - var(--space-5));
+}
+
+@media (min-width: 960px) {
+  .root > [data-block-type="heading"]:has(+ [data-block-type="paragraph"]) {
+    margin-bottom: calc(var(--space-3) - var(--space-6));
+  }
+}

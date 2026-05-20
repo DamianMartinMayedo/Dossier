@@ -5,6 +5,13 @@
 
 .main {
   flex: 1;
-  padding: var(--space-10);
+  padding: var(--space-6) var(--space-5);
   background: var(--color-surface);
+  min-width: 0;
+}
+
+@media (min-width: 960px) {
+  .main {
+    padding: var(--space-8) var(--space-8);
+  }
 }

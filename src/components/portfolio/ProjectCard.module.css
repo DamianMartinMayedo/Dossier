@@ -132,6 +132,14 @@
   bottom: var(--space-4);
 }
 
+/* Modificador: badge anclado abajo a la derecha (usado en variant list). */
+.tagBottomRight {
+  top: auto;
+  left: auto;
+  bottom: var(--space-4);
+  right: var(--space-4);
+}
+
 .body {
   padding: var(--space-6);
 }
@@ -272,6 +280,10 @@
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--color-surface-offset);
+}
+
+.imageContain :global(img) {
+  object-fit: contain !important;
 }
 
 @media (max-width: 900px) {

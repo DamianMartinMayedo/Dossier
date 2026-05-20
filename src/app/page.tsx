@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import ProjectCard from "@/components/portfolio/ProjectCard";
 import Marquee from "@/components/portfolio/Marquee";
 import CollabGrid from "@/components/portfolio/CollabGrid";
-import Cursor from "@/components/ui/Cursor";
+import HeroOrb from "@/components/portfolio/HeroOrb";
 import { CONTACT } from "@/lib/contact";
 import styles from "./page.module.css";
 
@@ -18,10 +18,9 @@ export default async function Home() {
 
   return (
     <>
-      <Cursor />
-
       {/* HERO */}
       <section className={styles.heroSection}>
+        <HeroOrb />
         <div className={styles.hero}>
           <div className={styles.heroLeft}>
             <p className={styles.eyebrow}>
@@ -75,6 +74,7 @@ export default async function Home() {
                   key={p.id}
                   project={p}
                   span={4}
+                  variant="home"
                 />
               ))}
             </div>
@@ -93,14 +93,12 @@ export default async function Home() {
             <div>
               <h2 className={styles.aboutTitle}>
                 Diseño con visión de{" "}
-                <em>producto</em>, no solo pantallas.
+                <em>producto.</em>
               </h2>
               <p className={styles.aboutText}>
                 Vengo del diseño gráfico clásico —licenciatura y máster— y aterricé en producto digital aprendiendo en startups. Eso significa que tanto puedo cerrar un design system como hacerte un logo, una landing o un sistema de impresos.
               </p>
-              <p className={styles.aboutText}>
-                Si necesitas un especialista puro, soy honesto: hay gente más profunda que yo en UX research. Si necesitas un diseñador que entienda el problema completo y entregue, ahí me muevo bien.
-              </p>
+
               <a href="/sobre-mi" className={styles.arrowLink}>
                 Más sobre mí <span>→</span>
               </a>

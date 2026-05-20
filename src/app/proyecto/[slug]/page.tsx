@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { ContentBlock, Project } from "@/types";
+import ProjectContent from "@/components/portfolio/ProjectContent";
 import styles from "./page.module.css";
 
 interface Props {
@@ -14,21 +16,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient();
   const { data: project } = await supabase
     .from("projects")
-    .select("title, description, slug, cover_image")
+    .select("title, subtitle, description, slug, cover_image, category")
     .eq("slug", slug)
     .single();
 
-  if (!project) return { title: "Proyecto no encontrado" };
+  if (!project || project.category === "secundario") {
+    return { title: "Proyecto no encontrado", robots: { index: false } };
+  }
+
+  const desc = project.subtitle || project.description;
 
   return {
     title: project.title,
-    description: project.description,
+    description: desc,
     alternates: {
       canonical: `https://damianmartin.es/proyecto/${project.slug}`,
     },
     openGraph: {
       title: project.title,
-      description: project.description,
+      description: desc,
       url: `https://damianmartin.es/proyecto/${project.slug}`,
       type: "article",
       images: project.cover_image
@@ -38,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: project.title,
-      description: project.description,
+      description: desc,
       images: project.cover_image ? [project.cover_image] : [],
     },
   };
@@ -52,16 +58,20 @@ export default async function Proyecto({ params }: Props) {
     .from("projects")
     .select("*")
     .eq("slug", slug)
-    .single();
+    .single<Project>();
 
   if (!project) notFound();
+  // Secundarios no tienen página de detalle: sólo lightbox desde /proyectos.
+  if (project.category === "secundario") notFound();
 
-  // Build metadata tags: services + year + client
   const tags = [
     ...project.services,
     project.year,
     project.client,
   ].filter(Boolean) as string[];
+
+  const blocks: ContentBlock[] = Array.isArray(project.content) ? project.content : [];
+  const hasBlocks = blocks.length > 0;
 
   return (
     <div className={styles.page}>
@@ -74,10 +84,9 @@ export default async function Proyecto({ params }: Props) {
 
       {/* ── Header ── */}
       <header className={styles.header}>
-        <p className={styles.category}>
-          {project.category === "principal" ? "Proyecto principal" : "Proyecto secundario"}
-        </p>
+        <p className={styles.category}>Proyecto principal</p>
         <h1 className={styles.title}>{project.title}</h1>
+        {project.subtitle && <p className={styles.subtitle}>{project.subtitle}</p>}
         {tags.length > 0 && (
           <div className={styles.meta}>
             {tags.map((tag) => (
@@ -87,47 +96,68 @@ export default async function Proyecto({ params }: Props) {
         )}
       </header>
 
-      {/* ── Cover ── */}
-      {project.cover_image && (
-        <div className={styles.cover}>
-          <div className={styles.coverInner}>
+      {/* ── Header image (full-bleed, opcional) ── */}
+      {project.header_image && (
+        <div className={styles.headerImage}>
+          <div className={styles.headerImageInner}>
             <Image
-              src={project.cover_image}
+              src={project.header_image}
               alt={project.title}
               fill
-              sizes="(min-width: 960px) 960px, 100vw"
-              className={styles.coverImg}
+              sizes="100vw"
+              className={styles.headerImg}
               priority
             />
           </div>
         </div>
       )}
 
-      {/* ── Description ── */}
-      {project.description && (
-        <div className={styles.body}>
-          <p className={styles.description}>{project.description}</p>
-        </div>
-      )}
+      {/* ── Contenido por bloques ── */}
+      {hasBlocks && <ProjectContent blocks={blocks} />}
 
-      {/* ── Gallery ── */}
-      {project.images && project.images.length > 0 && (
-        <div className={styles.gallery}>
-          <p className={styles.galleryLabel}>Imágenes del proyecto</p>
-          <div className={styles.galleryGrid}>
-            {project.images.map((image: string, i: number) => (
-              <div key={i} className={styles.galleryItem}>
+      {/* ── Fallback: cover + description + grid de imágenes ── */}
+      {!hasBlocks && (
+        <>
+          {project.cover_image && (
+            <div className={styles.cover}>
+              <div className={styles.coverInner}>
                 <Image
-                  src={image}
-                  alt={`${project.title} — imagen ${i + 1}`}
+                  src={project.cover_image}
+                  alt={project.title}
                   fill
-                  sizes="(min-width: 640px) 50vw, 100vw"
-                  className={styles.galleryImg}
+                  sizes="(min-width: 960px) 960px, 100vw"
+                  className={styles.coverImg}
+                  priority
                 />
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          )}
+
+          {project.description && (
+            <div className={styles.body}>
+              <p className={styles.description}>{project.description}</p>
+            </div>
+          )}
+
+          {project.images && project.images.length > 0 && (
+            <div className={styles.gallery}>
+              <p className={styles.galleryLabel}>Imágenes del proyecto</p>
+              <div className={styles.galleryGrid}>
+                {project.images.map((image: string, i: number) => (
+                  <div key={i} className={styles.galleryItem}>
+                    <Image
+                      src={image}
+                      alt={`${project.title} — imagen ${i + 1}`}
+                      fill
+                      sizes="(min-width: 640px) 50vw, 100vw"
+                      className={styles.galleryImg}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
