@@ -8,13 +8,22 @@
   text-align: left;
   width: 100%;
   padding: 0;
-  position: relative;
-  isolation: isolate;
-  border-radius: var(--radius-lg);
 }
 
-/* Borde base siempre visible */
-.card::before {
+.image {
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-lg);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Borde base siempre visible en la imagen */
+.image::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -24,8 +33,8 @@
   z-index: 2;
 }
 
-/* Shine en hover — 2px */
-.card::after {
+/* Shine en hover — 2px en la imagen */
+.image::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -54,25 +63,14 @@
   transition: opacity 0.3s ease;
 }
 
-.card:hover::after,
-.card:focus-visible::after {
+.card:hover .image::after,
+.card:focus-visible .image::after {
   opacity: 1;
   animation: shine-rotate-minimal 2.4s linear infinite;
 }
 
 @keyframes shine-rotate-minimal {
   to { --shine-angle: 360deg; }
-}
-
-.image {
-  aspect-ratio: 4 / 3;
-  background: var(--color-surface-offset);
-  border-radius: var(--radius-lg);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .image {

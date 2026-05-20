@@ -17,7 +17,6 @@
 /* ── Card (variant list) ──────────────────────────────────── */
 .card {
   position: relative;
-  isolation: isolate;
   background: var(--color-surface);
   border-radius: var(--radius-xl);
   cursor: pointer;
@@ -39,7 +38,7 @@
   z-index: 3;
 }
 
-/* Shine en hover — 2px */
+/* Shine en hover — 2px en la card completa */
 .card::after {
   content: "";
   position: absolute;
@@ -194,7 +193,6 @@
 /* ── Card variant "home": cover full ──────────────────── */
 .cardHome {
   position: relative;
-  isolation: isolate;
   border-radius: var(--radius-xl);
   overflow: hidden;
   display: block;
@@ -205,8 +203,16 @@
   height: 100%;
 }
 
-/* Borde base siempre visible */
-.cardHome::before {
+.imageHome {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-surface-offset);
+}
+
+/* Borde base siempre visible en la imagen */
+.imageHome::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -216,8 +222,8 @@
   z-index: 3;
 }
 
-/* Shine en hover — 2px */
-.cardHome::after {
+/* Shine en hover — 2px en la imagen */
+.imageHome::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -226,9 +232,9 @@
   background: conic-gradient(
     from var(--shine-angle, 0deg),
     transparent 0%,
-    transparent 55%,
-    var(--color-primary) 72%,
-    color-mix(in oklch, var(--color-primary) 70%, transparent) 82%,
+    transparent 60%,
+    var(--color-primary) 75%,
+    color-mix(in oklch, var(--color-primary) 60%, transparent) 85%,
     transparent 92%,
     transparent 100%
   );
@@ -246,22 +252,14 @@
   transition: opacity 0.3s ease;
 }
 
-.cardHome:hover::after,
-.cardHome:focus-visible::after {
+.cardHome:hover .imageHome::after,
+.cardHome:focus-visible .imageHome::after {
   opacity: 1;
   animation: shine-rotate-home 2.4s linear infinite;
 }
 
 @keyframes shine-rotate-home {
   to { --shine-angle: 360deg; }
-}
-
-.imageHome {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--color-surface-offset);
 }
 
 @media (max-width: 900px) {
