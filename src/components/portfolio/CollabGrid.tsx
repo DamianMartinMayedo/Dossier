@@ -1,22 +1,31 @@
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/server";
 import styles from "./CollabGrid.module.css";
 
-const LOGOS = [
-  { src: "/images/empresas/barrabes.webp", name: "Barrabes" },
-  { src: "/images/empresas/mandao.webp", name: "Mandao" },
-  { src: "/images/empresas/ciclogreen.webp", name: "Ciclogreen" },
-  { src: "/images/empresas/iwantic.webp", name: "Iwantic" },
-  { src: "/images/empresas/iwantpro.webp", name: "Iwantpro" },
-  { src: "/images/empresas/mapodec.webp", name: "Mapodec" },
-  { src: "/images/empresas/migallon.webp", name: "Migallón" },
-  { src: "/images/empresas/proxima.webp", name: "Próxima Energía" },
-  { src: "/images/empresas/proxya.webp", name: "Proxya" },
-  { src: "/images/empresas/starenlared.webp", name: "Starenlared" },
-  { src: "/images/empresas/transformacion-digital.webp", name: "Transformación Digital" },
-];
+interface CollaborationRow {
+  id: string;
+  name: string;
+  image_url: string;
+  order: number;
+}
 
-export default function CollabGrid() {
-  const items = [...LOGOS, ...LOGOS];
+/**
+ * Server component: lee la lista de colaboraciones desde Supabase y la
+ * renderiza como marquee infinito horizontal. Los logos se gestionan en
+ * /admin/empresas.
+ */
+export default async function CollabGrid() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("collaborations")
+    .select("id, name, image_url, order")
+    .order("order", { ascending: true });
+
+  const rows = (data ?? []) as CollaborationRow[];
+  if (rows.length === 0) return null;
+
+  // Duplicamos para que el loop CSS no muestre el corte al volver.
+  const items = [...rows, ...rows];
 
   return (
     <section className={styles.section}>
@@ -24,9 +33,9 @@ export default function CollabGrid() {
       <div className={styles.wrap}>
         <div className={styles.track}>
           {items.map((logo, i) => (
-            <div key={`${logo.name}-${i}`} className={styles.item}>
+            <div key={`${logo.id}-${i}`} className={styles.item}>
               <Image
-                src={logo.src}
+                src={logo.image_url}
                 alt={logo.name}
                 width={200}
                 height={56}

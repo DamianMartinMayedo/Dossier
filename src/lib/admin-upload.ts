@@ -5,7 +5,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"];
 
 /** Buckets aceptados por la API. Cualquier otro string es ignorado. */
-export type AdminUploadBucket = "projects" | "profile";
+export type AdminUploadBucket = "projects" | "profile" | "empresas";
 
 export const ADMIN_UPLOAD_ALLOWED_ACCEPT = ALLOWED_TYPES.join(",");
 export const ADMIN_UPLOAD_HINT = "PNG, JPG, WebP, GIF o SVG. Máx 10 MB.";

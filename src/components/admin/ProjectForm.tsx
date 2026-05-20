@@ -10,6 +10,7 @@ import Dropzone from "./Dropzone";
 import { useFileUpload } from "./useFileUpload";
 import ProjectMetaPanel from "./ProjectMetaPanel";
 import ContentEditor from "./ContentEditor";
+import Toast from "@/components/ui/Toast";
 import styles from "./ProjectForm.module.css";
 
 interface Props {
@@ -39,6 +40,7 @@ export default function ProjectForm({ project }: Props) {
   const headerUpload = useFileUpload();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
 
   function updateField<K extends keyof ProjectFormData>(key: K, value: ProjectFormData[K]) {
     setForm((prev) => {
@@ -103,8 +105,17 @@ export default function ProjectForm({ project }: Props) {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Error al guardar");
 
-      router.push("/admin/proyectos");
-      router.refresh();
+      if (isEditing) {
+        // Al editar nos quedamos en la misma página → sólo refrescamos y
+        // mostramos toast. Así no se pierde el scroll/contexto.
+        setToast("Proyecto actualizado");
+        router.refresh();
+      } else {
+        // Al crear, redirigimos a la ruta de edición del recién creado para
+        // poder subir imágenes y bloques con un id real.
+        router.push(`/admin/proyectos/${result.id}`);
+        router.refresh();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al guardar");
     } finally {
@@ -136,6 +147,7 @@ export default function ProjectForm({ project }: Props) {
   const isPrincipal = form.category === "principal";
 
   return (
+    <>
     <form id="project-form" onSubmit={handleSubmit} className={styles.form}>
       {error && <p className={styles.error}>{error}</p>}
 
@@ -237,5 +249,7 @@ export default function ProjectForm({ project }: Props) {
         </aside>
       </div>
     </form>
+    <Toast message={toast} onClose={() => setToast(null)} />
+    </>
   );
 }

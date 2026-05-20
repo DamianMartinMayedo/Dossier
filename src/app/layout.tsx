@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ThemeScript from "@/components/ui/ThemeScript";
 import Cursor from "@/components/ui/Cursor";
 import "./globals.css";
 
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
 const BASE_URL = "https://damianmartin.es";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Damián Martín — Diseñador UI/UX & generalista",
+    default: "Damián Martín - Diseñador",
     template: "%s — Damián Martín",
   },
   description:
@@ -31,13 +34,13 @@ export const metadata: Metadata = {
     locale: "es_ES",
     url: BASE_URL,
     siteName: "Damián Martín",
-    title: "Damián Martín — Diseñador UI/UX & generalista",
+    title: "Damián Martín - Diseñador",
     description:
       "8+ años diseñando productos digitales. UI/UX, branding y ecosistemas digitales de principio a fin.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Damián Martín — Diseñador UI/UX & generalista",
+    title: "Damián Martín - Diseñador",
     description:
       "8+ años diseñando productos digitales. UI/UX, branding y ecosistemas digitales de principio a fin.",
   },
@@ -72,6 +75,10 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        {/* GA4 — sólo se inyecta si la variable está configurada. El helper
+            de Next maneja next/script con estrategia adecuada y respeta la
+            política CSP por defecto. */}
+        {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
       </body>
     </html>
   );

@@ -62,6 +62,10 @@
 
 .item:hover .logo {
   filter: grayscale(0);
+  /* Sin blend: el logo se muestra con sus colores reales. Si dejamos
+     `multiply` activo, los canales se mezclan con el bg y la turquesa
+     (u otra marca) sale apagada/oscura. */
+  mix-blend-mode: normal;
   transform: scale(1.1);
 }
 
@@ -72,5 +76,6 @@
 
 [data-theme="dark"] .item:hover .logo {
   filter: grayscale(0);
+  mix-blend-mode: normal;
   transform: scale(1.1);
 }

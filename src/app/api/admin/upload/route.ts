@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { requireAdmin, createAdminClient } from "@/lib/supabase/admin";
 
-const ALLOWED_BUCKETS = ["projects", "profile"] as const;
+const ALLOWED_BUCKETS = ["projects", "profile", "empresas"] as const;
 type AllowedBucket = (typeof ALLOWED_BUCKETS)[number];
 const DEFAULT_BUCKET: AllowedBucket = "projects";
 

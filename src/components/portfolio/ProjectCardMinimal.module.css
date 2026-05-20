@@ -44,8 +44,8 @@
     from var(--shine-angle, 0deg),
     transparent 0%,
     transparent 60%,
-    var(--color-primary) 75%,
-    color-mix(in oklch, var(--color-primary) 60%, transparent) 85%,
+    var(--color-card-shine) 75%,
+    color-mix(in oklch, var(--color-card-shine) 60%, transparent) 85%,
     transparent 92%,
     transparent 100%
   );
@@ -107,8 +107,8 @@
     from var(--shine-angle, 0deg),
     transparent 0%,
     transparent 60%,
-    var(--color-primary) 75%,
-    color-mix(in oklch, var(--color-primary) 60%, transparent) 85%,
+    var(--color-card-shine) 75%,
+    color-mix(in oklch, var(--color-card-shine) 60%, transparent) 85%,
     transparent 92%,
     transparent 100%
   );

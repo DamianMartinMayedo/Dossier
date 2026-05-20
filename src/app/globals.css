@@ -26,6 +26,11 @@
   --color-primary-hover: #9d2e22;
   --color-primary-active: #7a2419;
   --color-primary-highlight: rgba(192, 57, 43, 0.08);
+  /* Color del shine animado en el borde de las cards (tema claro): warm
+     taupe — mismo "carril" cromático que el fondo (#f5f3ef) pero varios
+     pasos más oscuro, así contrasta sin meter color nuevo. En oscuro se
+     mantiene el primary. */
+  --color-card-shine: #968C7D;
   --color-error: #c0392b;
   --color-error-bg: rgba(192, 57, 43, 0.1);
   --color-success: #2c8a4a;
@@ -86,6 +91,9 @@
   --color-primary-hover: #c83d30;
   --color-primary-active: #a32e23;
   --color-primary-highlight: rgba(224, 82, 68, 0.12);
+  /* Tema oscuro: el shine se queda con el rojo primary (mejor contraste
+     y se ve bien sobre los fondos oscuros). */
+  --color-card-shine: var(--color-primary);
   --color-error: #e05244;
   --color-error-bg: rgba(224, 82, 68, 0.14);
   --color-success: #4cb073;
@@ -113,6 +121,7 @@
     --color-text-inverse: #111009;
     --color-primary: #e05244;
     --color-primary-highlight: rgba(224, 82, 68, 0.12);
+    --color-card-shine: var(--color-primary);
     --color-error: #e05244;
     --color-error-bg: rgba(224, 82, 68, 0.14);
     --color-success: #4cb073;
