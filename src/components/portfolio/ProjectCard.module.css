@@ -15,31 +15,25 @@
 }
 
 /* ── Card (variant list) ──────────────────────────────────── */
-.card {
+.cardWrap {
   position: relative;
-  background: var(--color-surface);
   border-radius: var(--radius-xl);
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  display: block;
   height: 100%;
-  overflow: hidden;
 }
 
 /* Borde base siempre visible */
-.card::before {
+.cardWrap::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   box-shadow: inset 0 0 0 1px var(--color-border);
   pointer-events: none;
-  z-index: 3;
+  z-index: 2;
 }
 
 /* Shine en hover — 2px en la card completa */
-.card::after {
+.cardWrap::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -64,18 +58,30 @@
   mask-composite: exclude;
   opacity: 0;
   pointer-events: none;
-  z-index: 4;
+  z-index: 3;
   transition: opacity 0.3s ease;
 }
 
-.card:hover::after,
-.card:focus-visible::after {
+.cardWrap:hover::after,
+.cardWrap:focus-visible::after {
   opacity: 1;
   animation: shine-rotate-card 2.4s linear infinite;
 }
 
 @keyframes shine-rotate-card {
   to { --shine-angle: 360deg; }
+}
+
+.card {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+  overflow: hidden;
 }
 
 .image {
@@ -191,39 +197,25 @@
 }
 
 /* ── Card variant "home": cover full ──────────────────── */
-.cardHome {
+.cardHomeWrap {
   position: relative;
   border-radius: var(--radius-xl);
-  overflow: hidden;
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  background: var(--color-surface-offset);
-  cursor: pointer;
   height: 100%;
 }
 
-.imageHome {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--color-surface-offset);
-}
-
-/* Borde base siempre visible en la imagen */
-.imageHome::before {
+/* Borde base siempre visible */
+.cardHomeWrap::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   box-shadow: inset 0 0 0 1px var(--color-border);
   pointer-events: none;
-  z-index: 3;
+  z-index: 2;
 }
 
-/* Shine en hover — 2px en la imagen */
-.imageHome::after {
+/* Shine en hover — 2px */
+.cardHomeWrap::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -248,18 +240,38 @@
   mask-composite: exclude;
   opacity: 0;
   pointer-events: none;
-  z-index: 4;
+  z-index: 3;
   transition: opacity 0.3s ease;
 }
 
-.cardHome:hover .imageHome::after,
-.cardHome:focus-visible .imageHome::after {
+.cardHomeWrap:hover::after,
+.cardHomeWrap:focus-visible::after {
   opacity: 1;
   animation: shine-rotate-home 2.4s linear infinite;
 }
 
 @keyframes shine-rotate-home {
   to { --shine-angle: 360deg; }
+}
+
+.cardHome {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--color-surface-offset);
+  cursor: pointer;
+  height: 100%;
+}
+
+.imageHome {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-surface-offset);
 }
 
 @media (max-width: 900px) {
