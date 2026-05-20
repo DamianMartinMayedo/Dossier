@@ -1,7 +1,6 @@
 .card {
   color: inherit;
   display: block;
-  transition: transform var(--transition-interactive);
   cursor: pointer;
   background: none;
   border: none;
@@ -11,49 +10,76 @@
   padding: 0;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-}
-
 .image {
   aspect-ratio: 4 / 3;
   background: var(--color-surface-offset);
   border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: box-shadow var(--transition-interactive);
 }
 
-.card:hover .image {
-  box-shadow: var(--shadow-md);
+/* Borde base siempre visible — sin desfase porque es el único borde */
+.image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Shine reflectante en hover — 2px */
+.image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--shine-angle, 0deg),
+    transparent 0%,
+    transparent 60%,
+    var(--color-primary) 75%,
+    color-mix(in oklch, var(--color-primary) 60%, transparent) 85%,
+    transparent 92%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .image::after,
+.card:focus-visible .image::after {
+  opacity: 1;
+  animation: shine-rotate-minimal 2.4s linear infinite;
+}
+
+@keyframes shine-rotate-minimal {
+  to { --shine-angle: 360deg; }
 }
 
 .imageInner {
   position: relative;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    145deg,
-    var(--color-surface-offset) 0%,
-    var(--color-surface-dynamic) 100%
-  );
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: var(--color-text-muted);
-  opacity: 0.45;
-  transition: opacity var(--transition-interactive);
-}
-
-.card:hover .imageInner {
-  opacity: 0.7;
 }
 
 .img {
@@ -115,24 +141,55 @@
   text-transform: uppercase;
 }
 
-/* Native <dialog> — showModal() provides the focus trap and Escape key */
+/* Native <dialog> — showModal() provides the focus trap and Escape key.
+ *
+ * IMPORTANT: scope `display` to `[open]` — el `<dialog>` sin `open` está
+ * `display: none` por UA-style. Si declaramos `display: flex` sin condición,
+ * todos los dialogs son visibles a la vez (bug observado: el último secundario
+ * del listado se mostraba en pantalla al cargar /proyectos).
+ */
 .modal {
-  /* Reset browser dialog defaults */
   border: none;
-  padding: var(--space-6);
   background: transparent;
+  margin: 0;
+  padding: 0;
+  /* Ocupar todo el viewport para que el flex-center funcione. */
+  width: 100vw;
+  height: 100dvh;
   max-width: 100vw;
   max-height: 100dvh;
-  /* Center the content */
+  inset: 0;
+  color: var(--color-text);
+  cursor: zoom-out;
+}
+
+.modal:not([open]) {
+  display: none;
+}
+
+.modal[open] {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: zoom-out;
+  padding: var(--space-6);
+  /* Container fade-in (la animación de "zoom" la lleva .modalImgWrap dentro). */
+  animation: modal-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Dark overlay via the native ::backdrop */
 .modal::backdrop {
   background: rgba(0, 0, 0, 0.85);
+  animation: backdrop-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes backdrop-fade-in {
+  from { background: rgba(0, 0, 0, 0); }
+  to { background: rgba(0, 0, 0, 0.85); }
 }
 
 .modalClose {
@@ -164,6 +221,29 @@
   height: min(85vh, 900px);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  /* Zoom-in effect: la imagen entra escalando desde 0.85 con un easing
+     "expo-out" que da sensación cinematográfica al click del usuario. */
+  animation: lightbox-zoom 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes lightbox-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open],
+  .modal::backdrop,
+  .modalImgWrap {
+    animation: none;
+  }
 }
 
 .modalImg {
