@@ -32,7 +32,6 @@ export default function ProjectCard({ project, featured, span = 6, variant = "li
               <ProjectThumb
                 project={project}
                 sizes="(min-width: 960px) 33vw, (min-width: 640px) 50vw, 100vw"
-                className={styles.imageContain}
               />
               {project.services.length > 0 && (
                 <span className={`${styles.tag} ${styles.tagBottom}`}>{project.services[0]}</span>
