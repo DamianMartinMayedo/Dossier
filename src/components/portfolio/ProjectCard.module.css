@@ -39,7 +39,7 @@
   z-index: 3;
 }
 
-/* Shine reflectante en hover — 2px */
+/* Shine en hover — 2px */
 .card::after {
   content: "";
   position: absolute;
@@ -49,9 +49,9 @@
   background: conic-gradient(
     from var(--shine-angle, 0deg),
     transparent 0%,
-    transparent 55%,
-    var(--color-primary) 72%,
-    color-mix(in oklch, var(--color-primary) 70%, transparent) 82%,
+    transparent 60%,
+    var(--color-primary) 75%,
+    color-mix(in oklch, var(--color-primary) 60%, transparent) 85%,
     transparent 92%,
     transparent 100%
   );
