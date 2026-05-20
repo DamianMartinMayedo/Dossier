@@ -61,7 +61,7 @@
 @media (min-width: 900px) {
   .sidebar {
     position: sticky;
-    top: calc(var(--space-4) + 56px);
+    top: var(--space-24);
   }
 }
 
