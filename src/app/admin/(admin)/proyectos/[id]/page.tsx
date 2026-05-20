@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import ProjectForm from "@/components/admin/ProjectForm";
-import styles from "./form-page.module.css";
+import styles from "../form-page.module.css";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -25,6 +25,14 @@ export default async function EditarProyecto({ params }: Props) {
         <div>
           <p className="section-label">Proyectos</p>
           <h1 className={styles.title}>Editar proyecto</h1>
+        </div>
+        <div className={styles.actions}>
+          <button type="submit" form="project-form" className={styles.submitBtn}>
+            Actualizar
+          </button>
+          <button type="button" form="project-form" className={styles.deleteBtn}>
+            Eliminar
+          </button>
         </div>
       </div>
       <ProjectForm project={project} />

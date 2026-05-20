@@ -1,5 +1,4 @@
 import ProjectForm from "@/components/admin/ProjectForm";
-import FormActions from "@/components/admin/FormActions";
 import styles from "../form-page.module.css";
 
 export default function NuevoProyecto() {
@@ -10,7 +9,11 @@ export default function NuevoProyecto() {
           <p className="section-label">Proyectos</p>
           <h1 className={styles.title}>Nuevo proyecto</h1>
         </div>
-        <FormActions isEditing={false} />
+        <div className={styles.actions}>
+          <button type="submit" form="project-form" className={styles.submitBtn}>
+            Crear proyecto
+          </button>
+        </div>
       </div>
       <ProjectForm />
     </div>

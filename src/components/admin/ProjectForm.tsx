@@ -236,17 +236,6 @@ export default function ProjectForm({ project }: Props) {
           />
         </aside>
       </div>
-
-      <div className={styles.buttons}>
-        <button type="submit" form="project-form" disabled={loading} className={styles.submitBtn}>
-          {loading ? "Guardando…" : isEditing ? "Actualizar" : "Crear proyecto"}
-        </button>
-        {isEditing && (
-          <button type="button" form="project-form" onClick={handleDelete} className={styles.deleteBtn}>
-            Eliminar
-          </button>
-        )}
-      </div>
     </form>
   );
 }
