@@ -38,7 +38,7 @@ export default function BlockGalleryForm({ block, onChange }: Props) {
   return (
     <>
       <div className={styles.row}>
-        <div className={styles.field} style={{ flex: "0 0 200px" }}>
+        <div className={`${styles.field} ${styles.fieldMedium}`}>
           <label className={styles.label}>Columnas (desktop)</label>
           <select
             className={styles.select}

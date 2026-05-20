@@ -12,7 +12,7 @@ export default function BlockHeadingForm({ block, onChange }: Props) {
   return (
     <>
       <div className={styles.row}>
-        <div className={styles.field} style={{ flex: "0 0 120px" }}>
+        <div className={`${styles.field} ${styles.fieldNarrow}`}>
           <label className={styles.label}>Nivel</label>
           <select
             className={styles.select}

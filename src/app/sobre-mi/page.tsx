@@ -1,21 +1,25 @@
 import { createClient } from "@/lib/supabase/server";
 import Image from "next/image";
-import styles from "./page.module.css";
 import type { Metadata } from "next";
+import type { Profile } from "@/types";
+import { CONTACT } from "@/lib/contact";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Sobre mí",
-  description: "Conoce más sobre Damián Martín: 8+ años en diseño UI/UX, branding y producto digital. Disponible para nuevos proyectos.",
+  description:
+    "Conoce más sobre Damián Martín: 8+ años en diseño UI/UX, branding y producto digital. Disponible para nuevos proyectos.",
   alternates: { canonical: "https://damianmartin.es/sobre-mi" },
 };
+
+/** Re-render en cada request — los cambios desde /admin/perfil se reflejan al instante. */
+export const revalidate = 0;
 
 export default async function SobreMi() {
   const supabase = await createClient();
 
-  const { data: profile } = await supabase
-    .from("profile")
-    .select("*")
-    .single();
+  const { data: profileRaw } = await supabase.from("profile").select("*").single();
+  const profile = profileRaw as Profile | null;
 
   if (!profile) {
     return (
@@ -27,32 +31,106 @@ export default async function SobreMi() {
 
   return (
     <div className={styles.page}>
-      <section className={styles.section}>
+      {/* ── Hero personal ───────────────────────────────────── */}
+      <section className={styles.hero}>
         <div className={styles.avatar}>
           <Image
-            src={profile?.avatar || "/foto_perfil.jpg"}
-            alt={profile?.name || "Damián Martín"}
-            width={120}
-            height={120}
+            src={profile.avatar || "/foto_perfil.jpg"}
+            alt={profile.name}
+            width={160}
+            height={160}
             className={styles.avatarImg}
+            priority
           />
         </div>
-        <h1 className={styles.name}>{profile?.name || "Damián Martín"}</h1>
-        <p className={styles.role}>Diseñador UI/UX · Branding · Producto digital · Sevilla</p>
-        <p className={styles.bio}>{profile?.bio}</p>
+        <p className={styles.eyebrow}>Sobre mí</p>
+        <h1 className={styles.name}>{profile.name}</h1>
+        {profile.role && <p className={styles.role}>{profile.role}</p>}
+        {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
+      </section>
 
-        {profile.skills && profile.skills.length > 0 && (
-          <div className={styles.skills}>
-            <h2 className={styles.heading}>Servicios</h2>
-            <div className={styles.skillList}>
-              {profile.skills.map((skill: string) => (
-                <span key={skill} className={styles.skill}>
-                  {skill}
-                </span>
-              ))}
-            </div>
+      {/* ── Formación + Idiomas ─────────────────────────────── */}
+      {(profile.formacion?.length > 0 || profile.languages?.length > 0) && (
+        <section className={styles.block}>
+          <p className="section-label">Formación</p>
+          <div className={styles.cards}>
+            {profile.formacion?.map((item, i) => (
+              <div key={i} className={styles.card}>
+                <p className={styles.cardLabel}>{item.label}</p>
+                <p className={styles.cardTitle}>{item.title}</p>
+                {item.subtitle && <p className={styles.cardSub}>{item.subtitle}</p>}
+              </div>
+            ))}
+            {profile.languages?.length > 0 && (
+              <div className={styles.card}>
+                <p className={styles.cardLabel}>Idiomas</p>
+                <p className={styles.cardSub}>{profile.languages.join(" · ")}</p>
+              </div>
+            )}
           </div>
-        )}
+        </section>
+      )}
+
+      {/* ── Stats ──────────────────────────────────────────── */}
+      {profile.stats?.length > 0 && (
+        <section className={styles.block}>
+          <div className={styles.stats}>
+            {profile.stats.map((stat, i) => (
+              <div key={i} className={styles.stat}>
+                <span className={styles.statNum}>{stat.num}</span>
+                <span className={styles.statLabel}>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Servicios / Skills ──────────────────────────────── */}
+      {(profile.services?.length > 0 || profile.skills?.length > 0) && (
+        <section className={styles.block}>
+          <p className="section-label">Lo que hago</p>
+          <div className={styles.chipList}>
+            {profile.services?.map((s) => (
+              <span key={`s-${s}`} className={styles.chip}>
+                {s}
+              </span>
+            ))}
+            {profile.skills?.map((s) => (
+              <span key={`k-${s}`} className={styles.chip}>
+                {s}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── CTAs ────────────────────────────────────────────── */}
+      <section className={styles.cta}>
+        <h2 className={styles.ctaTitle}>¿Hablamos?</h2>
+        <p className={styles.ctaSub}>
+          Cuéntame qué tienes entre manos. Respondo en menos de 24h, casi siempre antes.
+        </p>
+        <div className={styles.ctaButtons}>
+          <a
+            href={CONTACT.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.btnPrimary}
+          >
+            WhatsApp <span>↗</span>
+          </a>
+          <a href={`mailto:${CONTACT.email}`} className={styles.btnPrimary}>
+            Email <span>↗</span>
+          </a>
+          <a
+            href={CONTACT.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.btnPrimary}
+          >
+            LinkedIn <span>↗</span>
+          </a>
+        </div>
       </section>
     </div>
   );

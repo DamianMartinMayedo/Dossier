@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import styles from "./HeroOrb.module.css";
 
 /**
  * Fondo interactivo del hero: grid denso de dots que reaccionan al cursor.
@@ -252,29 +253,8 @@ export default function HeroOrb() {
   }, []);
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        pointerEvents: "none",
-        zIndex: 0,
-        contain: "strict",
-      }}
-      aria-hidden="true"
-    >
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          willChange: "transform",
-        }}
-      />
+    <div className={styles.canvasWrap} aria-hidden="true">
+      <canvas ref={canvasRef} className={styles.canvas} />
     </div>
   );
 }

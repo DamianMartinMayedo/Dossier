@@ -7,13 +7,9 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboard() {
   const supabase = await createClient();
 
-  const [{ count: projectsCount }, { count: unreadCount }] = await Promise.all([
-    supabase.from("projects").select("*", { count: "exact", head: true }),
-    supabase
-      .from("contact_messages")
-      .select("*", { count: "exact", head: true })
-      .eq("read", false),
-  ]);
+  const { count: projectsCount } = await supabase
+    .from("projects")
+    .select("*", { count: "exact", head: true });
 
   return (
     <div className={styles.page}>
@@ -26,9 +22,9 @@ export default async function AdminDashboard() {
           <span className={styles.label}>Proyectos</span>
         </Link>
 
-        <Link href="/admin/mensajes" className={styles.card}>
-          <span className={styles.number}>{unreadCount ?? 0}</span>
-          <span className={styles.label}>Mensajes sin leer</span>
+        <Link href="/admin/perfil" className={styles.card}>
+          <span className={styles.number}>1</span>
+          <span className={styles.label}>Perfil</span>
         </Link>
       </div>
 

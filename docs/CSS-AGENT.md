@@ -119,9 +119,19 @@ Regla mental: padding de input = `var(--space-3) var(--space-4)`. Padding de bot
 
 | Token                | Valor      | Uso                                |
 | -------------------- | ---------- | ---------------------------------- |
-| `--content-narrow`   | `640px`    | Forms, posts, contacto             |
+| `--content-narrow`   | `640px`    | Forms, posts                       |
 | `--content-default`  | `960px`    | Páginas estándar                   |
 | `--content-wide`     | `1200px`   | Grids de proyectos, marquees       |
+
+### Animated custom properties (`@property`)
+
+Registradas a nivel global en `globals.css` para que las animaciones de gradientes interpolen correctamente:
+
+| Property             | Tipo       | Initial | Uso                                       |
+| -------------------- | ---------- | ------- | ----------------------------------------- |
+| `--shine-angle`      | `<angle>`  | `0deg`  | Rotación del shine border en cards        |
+
+**Por qué `@property`**: sin él, los browsers tratan los custom properties como `string` y NO los interpolan en `@keyframes`. Con `@property` registered como `<angle>`, el browser interpola suavemente de `0deg` a `360deg` en una animación.
 
 ---
 
@@ -256,6 +266,222 @@ Si una clase de tu `.module.css` está reimplementando una de estas, bórrala y 
   font-size: var(--text-sm);
 }
 ```
+
+---
+
+## 4.b Patrones de animación
+
+Animaciones ya implementadas y validadas. Reutiliza estos snippets en lugar de reinventar.
+
+### Shine border (conic-gradient animado)
+
+Anillo reflectante que recorre el perímetro de un elemento. Usado en `ProjectCard`, `ProjectCardMinimal`, `cardHome`.
+
+Requiere `@property --shine-angle` declarado en `globals.css` (ver sección 2).
+
+```css
+.card {
+  position: relative;
+  isolation: isolate;          /* crea stacking context propio */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;                /* grosor del anillo */
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--shine-angle, 0deg),
+    transparent 0%,
+    transparent 55%,
+    var(--color-primary) 72%,
+    color-mix(in oklch, var(--color-primary) 70%, transparent) 82%,
+    transparent 92%,
+    transparent 100%
+  );
+  /* Máscara substractiva: anillo de "padding" px, hueco en el centro. */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover::before {
+  opacity: 1;
+  animation: shine-rotate 2.4s linear infinite;
+}
+
+@keyframes shine-rotate {
+  to { --shine-angle: 360deg; }
+}
+```
+
+### Marquee infinito horizontal
+
+Auto-scroll de items, loop sin saltos, pause en hover. Usado en `CarouselBlock`, `Marquee` (home), `FeaturedMarquee`.
+
+**Key**: el track contiene los items **duplicados** (`[...items, ...items]`) y se desplaza `-50%` exacto, que coincide con el ancho de una copia → loop invisible.
+
+```css
+.wrap {
+  max-width: var(--content-default);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+.viewport {
+  width: 100%;
+  overflow: hidden;
+  /* Fade en los bordes para que el corte no sea brusco. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--space-8),
+    black calc(100% - var(--space-8)),
+    transparent
+  );
+}
+
+.track {
+  display: flex;
+  gap: var(--space-4);
+  width: max-content;
+  will-change: transform;
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
+}
+
+.wrap:hover .track,
+.wrap:focus-within .track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - var(--space-4) / 2)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+    overflow-x: auto;            /* fallback scroll manual */
+  }
+}
+```
+
+En el TSX: `const doubled = [...items, ...items]; const duration = Math.max(20, items.length * 4);`. Pasa `duration` como CSS variable `--marquee-duration`.
+
+### Lightbox zoom-in (dialog modal)
+
+Apertura cinemática del `<dialog>`. Usado en `ProjectCardMinimal`.
+
+```css
+.modal[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modal-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+  animation: backdrop-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalImgWrap {
+  /* La imagen entra escalando desde 0.85 con expo-out → sensación de "zoom into" */
+  animation: lightbox-zoom 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+@keyframes backdrop-fade-in {
+  from { background: rgba(0, 0, 0, 0); }
+  to { background: rgba(0, 0, 0, 0.85); }
+}
+
+@keyframes lightbox-zoom {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open], .modal::backdrop, .modalImgWrap {
+    animation: none;
+  }
+}
+```
+
+**Importante**: `.modal:not([open]) { display: none }` debe existir. Si declaras `display: flex` sin condicionar a `[open]`, todos los dialogs son visibles a la vez (bug histórico — el último gana en stacking).
+
+### Hero canvas reactivo (HeroOrb)
+
+Fondo de canvas 2D con dots reactivos al cursor. Patrón performant para fondos interactivos sin tirar miles de elementos DOM.
+
+- 1 sólo `<canvas>` con RAF loop.
+- Posiciones de dots precomputadas en array (no DOM nodes).
+- Theme observer (MutationObserver) para repintar al cambiar light/dark.
+- Apagado en `(hover: none)` y `(prefers-reduced-motion: reduce)`.
+
+Ver `src/components/portfolio/HeroOrb.tsx` como referencia. **No reutilizar el efecto en otras páginas**: es un statement piece exclusivo del home.
+
+---
+
+## 4.c Componentes admin (patrones reusables)
+
+### `Dropzone` (`src/components/admin/Dropzone.tsx`)
+
+Visual file picker con drag-and-drop nativo + validación inline.
+
+Props: `multiple?`, `disabled?`, `label?`, `hint?`, `onFiles(files: File[])`, `compact?`.
+
+Úsalo en todos los formularios que reciban imágenes (cover de proyecto, header_image, galería, carrusel, avatar perfil). No vuelvas a escribir `<input type="file">` plano.
+
+### `BlockPreview` (`src/components/admin/BlockPreview.tsx`)
+
+Renderiza un bloque público (`HeadingBlock`, `ImageBlock`, etc.) dentro del editor para preview WYSIWYG. Recibe el bloque entero y dispatchea al componente público correcto.
+
+### `BlockShell` (`src/components/admin/blocks/BlockShell.tsx`)
+
+Wrapper común a todos los block forms. Provee:
+- Header colapsable con tipo + summary
+- Toggle de vista: `Vista` / `Ambos` / `Editar`
+- Botones de mover arriba/abajo, eliminar
+
+Cualquier nuevo tipo de bloque debe envolverse en `BlockShell` para mantener UX consistente.
+
+### Inputs admin — clases compartidas
+
+`src/components/admin/blocks/BlockFields.module.css` exporta:
+
+| Clase            | Uso                                                    |
+| ---------------- | ------------------------------------------------------ |
+| `.row`           | Flex row gap-3, wrap. Agrupa 2+ campos lado a lado.    |
+| `.field`         | Flex column gap-2. Wrapper de un par label+input.      |
+| `.fieldNarrow`   | `flex: 0 0 120px` — para campos pequeños (ej. nivel).  |
+| `.fieldMedium`   | `flex: 0 0 200px` — campos medianos (ej. columnas).    |
+| `.fieldWide`     | `flex: 0 0 220px` — campos amplios (ej. proporción).   |
+| `.label`         | Etiqueta uppercase faint.                              |
+| `.input`         | Input/select estándar (border, padding, focus ring).   |
+| `.textarea`      | Como `.input` pero con min-height.                     |
+| `.select`        | Como `.input` con appearance:none + chevron.           |
+| `.imageList`     | Grid de imágenes existentes con thumb + alt + remove.  |
+| `.preview`       | Wrapper aspect-ratio para imagen subida (cover/header).|
+
+Para limitar el ancho de un `.field`, **nunca** uses `style={{flex: "0 0 Npx"}}` inline — usa `.fieldNarrow/Medium/Wide` o añade una nueva clase si necesitas otra medida.
 
 ---
 

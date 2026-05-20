@@ -2,9 +2,20 @@ import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { requireAdmin, createAdminClient } from "@/lib/supabase/admin";
 
-const BUCKET = "projects";
+const ALLOWED_BUCKETS = ["projects", "profile"] as const;
+type AllowedBucket = (typeof ALLOWED_BUCKETS)[number];
+const DEFAULT_BUCKET: AllowedBucket = "projects";
+
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+
+function resolveBucket(value: FormDataEntryValue | null): AllowedBucket {
+  if (typeof value !== "string") return DEFAULT_BUCKET;
+  if ((ALLOWED_BUCKETS as readonly string[]).includes(value)) {
+    return value as AllowedBucket;
+  }
+  return DEFAULT_BUCKET;
+}
 
 export async function POST(req: Request) {
   const authError = await requireAdmin();
@@ -36,20 +47,24 @@ export async function POST(req: Request) {
     );
   }
 
+  // Bucket: viene del FormData (`bucket`). Validado contra ALLOWED_BUCKETS,
+  // si llega cualquier otra cosa cae a "projects" por defecto.
+  const bucket = resolveBucket(formData.get("bucket"));
+
   const ext = file.name.split(".").pop() ?? "jpg";
   const fileName = `${uuidv4()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   const supabase = createAdminClient();
   const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
+    .from(bucket)
     .upload(fileName, buffer, { contentType: file.type });
 
   if (uploadError) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 });
   }
 
-  const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(fileName);
+  const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
   return NextResponse.json({ url: publicUrl });
 }
@@ -58,13 +73,15 @@ export async function DELETE(req: Request) {
   const authError = await requireAdmin();
   if (authError) return authError;
 
-  const { paths } = await req.json() as { paths: string[] };
-  if (!Array.isArray(paths) || paths.length === 0) {
+  const body = (await req.json()) as { paths: string[]; bucket?: string };
+  if (!Array.isArray(body.paths) || body.paths.length === 0) {
     return NextResponse.json({ error: "No paths provided" }, { status: 400 });
   }
 
+  const bucket = resolveBucket(body.bucket ?? null);
+
   const supabase = createAdminClient();
-  const { error } = await supabase.storage.from(BUCKET).remove(paths);
+  const { error } = await supabase.storage.from(bucket).remove(body.paths);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -14,7 +14,7 @@ interface Props {
 const LINKS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/proyectos", label: "Proyectos" },
-  { href: "/admin/mensajes", label: "Mensajes" },
+  { href: "/admin/perfil", label: "Perfil" },
 ];
 
 export default function AdminNav({ userEmail }: Props) {

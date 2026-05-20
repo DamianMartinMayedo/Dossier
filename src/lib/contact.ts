@@ -1,6 +1,6 @@
 /**
  * Datos de contacto canónicos.
- * Actualiza aquí y el cambio se propaga a Header, Footer, home y /contacto.
+ * Actualiza aquí y el cambio se propaga a Header, Footer, home y /sobre-mi.
  */
 
 export const CONTACT = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { uploadAdminFile } from "@/lib/admin-upload";
+import { uploadAdminFile, type AdminUploadBucket } from "@/lib/admin-upload";
 
 export interface FileUploadState {
   uploading: boolean;
@@ -9,8 +9,11 @@ export interface FileUploadState {
   upload: (files: File[]) => Promise<string[]>;
 }
 
-/** Sube una lista de Files a /api/admin/upload y devuelve sus URLs públicas en orden. */
-export function useFileUpload(): FileUploadState {
+/**
+ * Sube una lista de Files a /api/admin/upload (bucket por defecto "projects").
+ * Pasa `bucket: "profile"` para subir al bucket de perfil/avatar.
+ */
+export function useFileUpload(bucket: AdminUploadBucket = "projects"): FileUploadState {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,7 +24,7 @@ export function useFileUpload(): FileUploadState {
     try {
       const urls: string[] = [];
       for (const f of files) {
-        urls.push(await uploadAdminFile(f));
+        urls.push(await uploadAdminFile(f, bucket));
       }
       return urls;
     } catch (err) {

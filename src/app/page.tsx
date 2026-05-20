@@ -1,10 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
-import ProjectCard from "@/components/portfolio/ProjectCard";
+import FeaturedMarquee from "@/components/portfolio/FeaturedMarquee";
 import Marquee from "@/components/portfolio/Marquee";
 import CollabGrid from "@/components/portfolio/CollabGrid";
 import HeroOrb from "@/components/portfolio/HeroOrb";
 import { CONTACT } from "@/lib/contact";
 import styles from "./page.module.css";
+
+/** Re-render en cada request — los cambios desde /admin se reflejan al instante.
+    revalidatePath() en /api/admin/projects + /api/admin/profile invalida los snapshots. */
+export const revalidate = 0;
 
 export default async function Home() {
   const supabase = await createClient();
@@ -68,16 +72,7 @@ export default async function Home() {
               Los proyectos aparecerán aquí cuando los añadas desde el panel admin.
             </p>
           ) : (
-            <div className={styles.grid}>
-              {principales.slice(0, 3).map((p) => (
-                <ProjectCard
-                  key={p.id}
-                  project={p}
-                  span={4}
-                  variant="home"
-                />
-              ))}
-            </div>
+            <FeaturedMarquee projects={principales} />
           )}
         </div>
       </section>
@@ -85,54 +80,20 @@ export default async function Home() {
       {/* COLABORACIONES */}
       <CollabGrid />
 
-      {/* SOBRE MÍ */}
+      {/* SOBRE MÍ — teaser compacto, detalle en /sobre-mi */}
       <section className="section" id="sobre">
         <div className="container">
-          <p className="section-label">Sobre mí</p>
-          <div className={styles.aboutGrid}>
-            <div>
-              <h2 className={styles.aboutTitle}>
-                Diseño con visión de{" "}
-                <em>producto.</em>
-              </h2>
-              <p className={styles.aboutText}>
-                Vengo del diseño gráfico clásico —licenciatura y máster— y aterricé en producto digital aprendiendo en startups. Eso significa que tanto puedo cerrar un design system como hacerte un logo, una landing o un sistema de impresos.
-              </p>
-
-              <a href="/sobre-mi" className={styles.arrowLink}>
-                Más sobre mí <span>→</span>
-              </a>
-            </div>
-            <div className={styles.aboutCards}>
-              <div className={styles.aboutCard}>
-                <p className={styles.cardLabel}>Formación</p>
-                <p className={styles.cardTitle}>Lic. Diseño de Comunicación Visual</p>
-                <p className={styles.cardSub}>Universidad de La Habana</p>
-              </div>
-              <div className={styles.aboutCard}>
-                <p className={styles.cardLabel}>Máster</p>
-                <p className={styles.cardTitle}>Diseño Gráfico y Multimedia</p>
-                <p className={styles.cardSub}>Escuela Superior de Informática · CIPSA</p>
-              </div>
-              <div className={styles.aboutCard}>
-                <p className={styles.cardLabel}>Idiomas</p>
-                <p className={styles.cardSub}>Español nativo · Inglés intermedio</p>
-              </div>
-              <div className={styles.aboutStats}>
-                <div className={styles.aboutStat}>
-                  <span className={styles.aboutStatNum}>8+</span>
-                  <span className={styles.aboutStatLabel}>años de experiencia</span>
-                </div>
-                <div className={styles.aboutStat}>
-                  <span className={styles.aboutStatNum}>30+</span>
-                  <span className={styles.aboutStatLabel}>proyectos entregados</span>
-                </div>
-                <div className={styles.aboutStat}>
-                  <span className={styles.aboutStatNum}>3</span>
-                  <span className={styles.aboutStatLabel}>co-fundaciones</span>
-                </div>
-              </div>
-            </div>
+          <div className={styles.aboutTeaser}>
+            <p className="section-label">Sobre mí</p>
+            <h2 className={styles.aboutTitle}>
+              Diseño con visión de <em>producto.</em>
+            </h2>
+            <p className={styles.aboutText}>
+              Vengo del diseño gráfico clásico —licenciatura y máster— y aterricé en producto digital aprendiendo en startups. Tanto puedo cerrar un design system como hacerte un logo, una landing o un sistema de impresos.
+            </p>
+            <a href="/sobre-mi" className={styles.arrowLink}>
+              Más sobre mí <span>→</span>
+            </a>
           </div>
         </div>
       </section>

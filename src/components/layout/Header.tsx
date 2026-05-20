@@ -7,7 +7,7 @@ import styles from "./Header.module.css";
 
 const NAV_LINKS = [
   { href: "/proyectos", label: "Proyectos" },
-  { href: "/#sobre", label: "Sobre mí" },
+  { href: "/sobre-mi", label: "Sobre mí" },
   { href: "/#contacto", label: "Contacto" },
 ];
 

@@ -11,6 +11,9 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+/** Re-render en cada request — los cambios desde /admin se reflejan al instante. */
+export const revalidate = 0;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createClient();

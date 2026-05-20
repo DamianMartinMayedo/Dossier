@@ -139,7 +139,7 @@ export default function BlockTwoColumnsForm({ block, onChange }: Props) {
   return (
     <>
       <div className={styles.row}>
-        <div className={styles.field} style={{ flex: "0 0 220px" }}>
+        <div className={`${styles.field} ${styles.fieldWide}`}>
           <label className={styles.label}>Proporción de columnas</label>
           <select
             className={styles.select}

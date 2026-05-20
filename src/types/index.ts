@@ -89,13 +89,29 @@ export interface Project {
   updated_at: string;
 }
 
+export interface ProfileFormacionItem {
+  label: string;    // ej. "Formación", "Máster"
+  title: string;    // ej. "Lic. Diseño de Comunicación Visual"
+  subtitle: string; // ej. "Universidad de La Habana"
+}
+
+export interface ProfileStat {
+  num: string;   // "8+"
+  label: string; // "años de experiencia"
+}
+
 export interface Profile {
   id: string;
   name: string;
+  role: string;
   bio: string;
   avatar: string | null;
   skills: string[];
   social_links: SocialLinks;
+  formacion: ProfileFormacionItem[];
+  languages: string[];
+  stats: ProfileStat[];
+  services: string[];
 }
 
 export interface SocialLinks {

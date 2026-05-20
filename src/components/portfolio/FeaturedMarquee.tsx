@@ -1,63 +1,56 @@
 "use client";
 
-import { useRef } from "react";
-import Link from "next/link";
+import type { CSSProperties } from "react";
 import type { Project } from "@/types";
-import ProjectThumb from "./ProjectThumb";
+import ProjectCard from "./ProjectCard";
 import styles from "./FeaturedMarquee.module.css";
 
 interface Props {
   projects: Project[];
 }
 
+/**
+ * Marquee horizontal infinito de los proyectos destacados.
+ *
+ * Patrón: duplicamos la lista y animamos translateX(-50%) — al llegar a la
+ * mitad, el contenido visible coincide pixel-perfect con el inicio, así el
+ * loop es invisible. Pausa al hover/focus para que se puedan leer las cards.
+ *
+ * Misma card que `/proyectos` (variant home: cover full + badge bottom-left
+ * + shine border en hover).
+ */
 export default function FeaturedMarquee({ projects }: Props) {
-  const trackRef = useRef<HTMLDivElement>(null);
-
   if (!projects || projects.length === 0) return null;
 
-  const items = [...projects, ...projects];
+  const doubled = [...projects, ...projects];
+
+  // Duración escalada al nº de proyectos (más proyectos = más lento para que
+  // se aprecien). 5s por proyecto, mínimo 30s, máximo 90s.
+  const duration = Math.min(90, Math.max(30, projects.length * 5));
+  const trackStyle = { "--marquee-duration": `${duration}s` } as CSSProperties;
 
   return (
-    <div className={styles.wrap}>
-      <div className={styles.track} ref={trackRef}>
-        {items.map((p, i) => (
-          <Link
-            key={`${p.id}-${i}`}
-            href={`/proyecto/${p.slug}`}
-            className={styles.card}
-          >
-            <div className={styles.image}>
-              <div className={styles.imageInner}>
-                <ProjectThumb
-                  project={p}
-                  sizes="(min-width: 960px) 50vw, 90vw"
-                />
+    <div
+      className={styles.wrap}
+      role="region"
+      aria-roledescription="carrusel"
+      aria-label="Proyectos destacados"
+    >
+      <div className={styles.viewport}>
+        <div className={styles.track} style={trackStyle}>
+          {doubled.map((project, i) => {
+            const isDuplicate = i >= projects.length;
+            return (
+              <div
+                key={`${project.id}-${i}`}
+                className={styles.item}
+                aria-hidden={isDuplicate ? "true" : undefined}
+              >
+                <ProjectCard project={project} variant="home" span={4} />
               </div>
-              {p.services.length > 0 && (
-                <span className={styles.tag}>{p.services[0]}</span>
-              )}
-            </div>
-            <div className={styles.body}>
-              <p className={styles.meta}>
-                {p.year || "—"} · {p.client || "Proyecto"}
-              </p>
-              <h3 className={styles.title}>{p.title}</h3>
-              <p className={styles.desc}>{p.description}</p>
-              <div className={styles.footer}>
-                <div className={styles.tags}>
-                  {p.services.slice(0, 3).map((s) => (
-                    <span key={s} className={styles.chip}>
-                      {s}
-                    </span>
-                  ))}
-                </div>
-                <span className={styles.arrow}>
-                  Ver <span>→</span>
-                </span>
-              </div>
-            </div>
-          </Link>
-        ))}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

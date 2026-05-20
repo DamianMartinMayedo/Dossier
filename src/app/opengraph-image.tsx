@@ -69,7 +69,9 @@ export default function OGImage() {
         />
 
         {/* Stats */}
-        <div style={{ fontSize: 24, color: "#555" }}>
+        {/* color literal = aprox --color-text-muted del theme light;
+            opengraph-image corre en edge runtime y no puede leer CSS tokens. */}
+        <div style={{ fontSize: 24, color: "#706a61" }}>
           8+ años · 30+ proyectos · Sevilla
         </div>
 

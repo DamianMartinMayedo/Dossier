@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://damianmartin.es/proyectos" },
 };
 
+/** Re-render en cada request — los cambios desde /admin se reflejan al instante. */
+export const revalidate = 0;
+
 export default async function Proyectos() {
   const supabase = await createClient();
 

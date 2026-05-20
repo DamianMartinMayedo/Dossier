@@ -71,7 +71,7 @@ export default function BlockImageForm({ block, onChange }: Props) {
             placeholder="Texto alternativo para accesibilidad y SEO"
           />
         </div>
-        <div className={styles.field} style={{ flex: "0 0 220px" }}>
+        <div className={`${styles.field} ${styles.fieldWide}`}>
           <label className={styles.label}>Ancho</label>
           <select
             className={styles.select}
