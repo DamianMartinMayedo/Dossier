@@ -20,7 +20,7 @@ export default function CollabGrid() {
 
   return (
     <section className={styles.section}>
-      <p className={styles.label}>Colaboraciones</p>
+      <p className={styles.label}>Han confiado en mi:</p>
       <div className={styles.wrap}>
         <div className={styles.track}>
           {items.map((logo, i) => (

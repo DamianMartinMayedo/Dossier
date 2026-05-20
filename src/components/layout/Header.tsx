@@ -2,14 +2,35 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import styles from "./Header.module.css";
 
 const NAV_LINKS = [
+  { href: "/", label: "Inicio" },
   { href: "/proyectos", label: "Proyectos" },
   { href: "/sobre-mi", label: "Sobre mí" },
   { href: "/#contacto", label: "Contacto" },
 ];
+
+/**
+ * Marca un link como activo según la ruta actual.
+ *
+ * - "/" → activo sólo si la ruta es exactamente "/" (home).
+ * - "/proyectos" → activo en "/proyectos" y en cualquier sub-ruta (/proyecto/[slug]).
+ * - "/sobre-mi" → activo en "/sobre-mi".
+ * - Hash links (#contacto) no se marcan: el pathname no expone el hash y son
+ *   secciones dentro del home, no rutas.
+ */
+function isLinkActive(href: string, pathname: string): boolean {
+  if (href.includes("#")) return false;
+  if (href === "/") return pathname === "/";
+  // /proyectos también cubre /proyecto/[slug] — ambas son "estoy viendo proyectos".
+  if (href === "/proyectos") {
+    return pathname === "/proyectos" || pathname.startsWith("/proyecto/");
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export default function Header() {
   const pathname = usePathname();
@@ -57,7 +78,12 @@ export default function Header() {
 
         <nav className={styles.nav}>
           {NAV_LINKS.map(({ href, label }) => (
-            <Link key={href} href={href} className={styles.link}>
+            <Link
+              key={href}
+              href={href}
+              className={cn(styles.link, isLinkActive(href, pathname) && styles.linkActive)}
+              aria-current={isLinkActive(href, pathname) ? "page" : undefined}
+            >
               {label}
             </Link>
           ))}

@@ -1,16 +1,19 @@
 /* HeroOrb — fondo canvas con dots reactivos al cursor.
  *
- * El wrapper ocupa todo el espacio del hero como background absoluto.
- * El canvas dentro hace fill total. `contain: strict` aísla el repaint
- * del canvas del resto de la página para que el RAF loop no cause
- * recalcs innecesarios fuera de su área.
+ * Position fixed cubriendo el viewport: el efecto está presente en TODAS las
+ * secciones del home (cuando se hace scroll, los dots permanecen reaccionando
+ * en su sitio). Sólo se monta en la home (page.tsx lo importa exclusivamente
+ * ahí), así que no aparece en /proyectos /sobre-mi /admin.
+ *
+ * z-index 0 + el contenido del home envuelto en `.pageContent` con z-index 1
+ * (ver page.module.css) → el canvas queda por debajo de todo lo legible.
  */
 
 .canvasWrap {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;

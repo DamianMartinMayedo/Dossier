@@ -18,21 +18,6 @@
 .viewport {
   width: 100%;
   overflow: hidden;
-  /* Máscara suave en los bordes para que no se vea el corte abrupto. */
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    black var(--space-8),
-    black calc(100% - var(--space-8)),
-    transparent
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black var(--space-8),
-    black calc(100% - var(--space-8)),
-    transparent
-  );
 }
 
 .track {
@@ -105,11 +90,6 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .viewport {
-    -webkit-mask-image: none;
-    mask-image: none;
   }
 
   .item {

@@ -1,6 +1,13 @@
+/* Envoltorio de todo el contenido del home — vive por encima del HeroOrb fixed
+   (z-index 0). Sin él, el canvas se pintaría por encima de las secciones. */
+.pageContent {
+  position: relative;
+  z-index: 1;
+}
+
 .heroSection {
   position: relative;
-  background: var(--color-bg);
+  /* Sin background: dejamos que el canvas del HeroOrb se vea a través. */
   overflow: hidden;
 }
 

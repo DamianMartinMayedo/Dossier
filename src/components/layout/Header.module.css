@@ -36,15 +36,45 @@
   align-items: center;
 }
 
+/* Hover: el texto se "rellena" de color primario desde el centro hacia los lados.
+ *
+ * Truco: dos backgrounds apilados, ambos clipados al texto.
+ *   1. Capa inferior (muted): siempre 100% — color base del texto.
+ *   2. Capa superior (primary): centrada, animamos `background-size` de 0 a 100%
+ *      → la banda primary crece desde el centro hacia ambos extremos.
+ *
+ * `color: var(--color-text-muted)` queda como fallback si bg-clip falla.
+ */
 .link {
+  position: relative;
   font-size: var(--text-sm);
   font-weight: 500;
   text-decoration: none;
-  color: var(--color-text-muted);
   letter-spacing: -0.01em;
-  transition: color var(--transition-interactive);
+  padding-block: var(--space-1);
+
+  color: var(--color-text-muted);
+  background-image:
+    linear-gradient(var(--color-primary), var(--color-primary)),
+    linear-gradient(var(--color-text-muted), var(--color-text-muted));
+  background-size: 0% 100%, 100% 100%;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  transition: background-size 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .link:hover {
-  color: var(--color-text);
+  background-size: 100% 100%, 100% 100%;
+}
+
+/* Estado activo: primary fijo (sin gradient, sin animación). */
+.linkActive,
+.linkActive:hover {
+  color: var(--color-primary);
+  background-image: none;
+  -webkit-text-fill-color: var(--color-primary);
 }

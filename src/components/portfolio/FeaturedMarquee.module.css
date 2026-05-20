@@ -1,7 +1,8 @@
-/* Marquee infinito horizontal de proyectos destacados.
+/* Marquee infinito horizontal — versión scroll-based.
  *
- * Patrón documentado en docs/CSS-AGENT.md §4.b "Marquee infinito".
- * Items duplicados en el TSX, track desplaza -50% en loop linear.
+ * El JS anima `scrollLeft` y resetea al cruzar la mitad. Esto permite
+ * arrastrar con el ratón, swipe táctil y scroll con wheel sin romper
+ * el loop. Sin máscara en los bordes (cortes nítidos, los pidió así).
  */
 
 .wrap {
@@ -13,79 +14,58 @@
 
 .viewport {
   width: 100%;
-  overflow: hidden;
-  /* Fade en los bordes laterales para que el corte se vea suave. */
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    black var(--space-10),
-    black calc(100% - var(--space-10)),
-    transparent
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black var(--space-10),
-    black calc(100% - var(--space-10)),
-    transparent
-  );
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* `overscroll-behavior` para que el drag horizontal no dispare back-swipe del browser. */
+  overscroll-behavior-x: contain;
+  /* `touch-action: pan-x` permite swipe horizontal sin que pelee con el scroll vertical de la página. */
+  touch-action: pan-x;
+}
+
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.grabbing {
+  cursor: grabbing;
 }
 
 .track {
   display: flex;
   gap: var(--space-6);
   width: max-content;
-  will-change: transform;
-  animation: featured-marquee var(--marquee-duration, 60s) linear infinite;
-}
-
-.wrap:hover .track,
-.wrap:focus-within .track {
-  animation-play-state: paused;
-}
-
-@keyframes featured-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    /* -50% es el ancho de UNA copia. El gap incluido en el cálculo. */
-    transform: translateX(calc(-50% - var(--space-6) / 2));
-  }
+  /* Padding interno mínimo para que la sombra/shine no se corte. */
+  padding-block: var(--space-1);
 }
 
 .item {
-  /* Ancho fijo por card — controla cuánto se ve en pantalla a la vez. */
-  flex: 0 0 280px;
+  flex: 0 0 360px;
+  /* Evita que el browser intente seleccionar texto al arrastrar. */
+  user-select: none;
 }
 
 @media (min-width: 640px) {
   .item {
-    flex: 0 0 320px;
+    flex: 0 0 440px;
   }
 }
 
 @media (min-width: 960px) {
   .item {
-    flex: 0 0 360px;
+    flex: 0 0 540px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .track {
-    animation: none;
-    width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-
+  /* El RAF loop se detiene de facto si el usuario nunca interactúa; el viewport
+     queda como un carrusel normal scrollable. No hace falta cambiar nada. */
   .viewport {
-    -webkit-mask-image: none;
-    mask-image: none;
+    scroll-snap-type: x mandatory;
   }
-
   .item {
-    scroll-snap-align: center;
+    scroll-snap-align: start;
   }
 }

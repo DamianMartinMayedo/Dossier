@@ -5,9 +5,11 @@
   padding-block: var(--space-4) var(--space-8);
   /* Scope: bump local widths sin tocar tokens globales.
      Estos overrides cascadean a los bloques hijos (HeadingBlock,
-     ParagraphBlock, ImageBlock, GalleryBlock, CarouselBlock, TwoColumnsBlock). */
+     ParagraphBlock, ImageBlock, GalleryBlock, CarouselBlock, TwoColumnsBlock).
+     Mismo valor para narrow y default → texto e imágenes alineados a 760px.
+     Las imágenes con width="full" (clase .full) siguen siendo 100%. */
   --content-narrow: 760px;
-  --content-default: 1100px;
+  --content-default: 760px;
 }
 
 @media (min-width: 960px) {

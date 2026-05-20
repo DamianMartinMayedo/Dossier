@@ -132,12 +132,20 @@
   bottom: var(--space-4);
 }
 
-/* Modificador: badge anclado abajo a la derecha (usado en variant list). */
-.tagBottomRight {
-  top: auto;
-  left: auto;
-  bottom: var(--space-4);
-  right: var(--space-4);
+/* Badge en el body (variant list): chip pequeño sin posicionamiento absoluto.
+   Vive junto al año dentro del footer. */
+.bodyTag {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25em 0.65em;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
 }
 
 .body {
@@ -169,6 +177,13 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
+}
+
+.footerLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 /* Año discreto (reemplaza los antiguos chips de servicios). */

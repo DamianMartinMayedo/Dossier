@@ -1,18 +1,22 @@
 import styles from "./Marquee.module.css";
 
 const ITEMS = [
-  "UI/UX Design",
+  "UI/UX",
   "Branding",
   "Figma",
   "Design Systems",
   "Prototipado",
-  "User Research",
   "WordPress",
   "Shopify",
-  "Hotjar",
-  "FullStory",
-  "Adobe CC",
-  "Arquitectura IA",
+  "Adobe Illustrator",
+  "Adobe Photoshop",
+  "Adobe Premiere Pro",
+  "Adobe After Effects",
+  "Affinity",
+  "Canva",
+  "VSCode",
+  "AI",
+  "Claude Code"
 ];
 
 export default function Marquee() {

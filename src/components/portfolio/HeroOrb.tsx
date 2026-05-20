@@ -4,54 +4,57 @@ import { useEffect, useRef } from "react";
 import styles from "./HeroOrb.module.css";
 
 /**
- * Fondo interactivo del hero: grid denso de dots que reaccionan al cursor.
+ * Fondo interactivo del hero: grid de líneas horizontales planas EN REPOSO.
+ * El cursor "provoca" una ondulación sinusoidal a su alrededor — las líneas
+ * cercanas se curvan en patrón sin() con desfase entre filas (flujo tipo
+ * tela ondulada). Sin animación temporal: el patrón es estático y sólo se
+ * mueve cuando el ratón se mueve.
  *
- * Implementación con Canvas 2D para máximo rendimiento:
- * - Sin elementos DOM individuales (solo 1 canvas)
- * - Dibujo directo en cada frame
- * - Throttle cuando el cursor no se mueve
- * - GPU acceleration explícita
- * - Actualización automática al cambiar de tema
+ * Implementación con Canvas 2D:
+ * - 1 path por fila → polilínea con muchos puntos siguiendo un sin().
+ * - La amplitud está modulada radialmente por una campana coseno centrada
+ *   en el cursor: 0 fuera del FOCUS_RADIUS, máxima en el puntero.
+ * - Halo radial controla la alpha → la ola se ve sólo donde el cursor está.
  *
- * Sin animación en touch / reduced-motion.
+ * Sin efecto en touch / reduced-motion.
  */
 
-const COLS = 64;
-const ROWS = 32;
-const INFLUENCE_RADIUS = 0.22;
-const DOT_SIZE = 1.5;
+const COLS = 140;
+const ROWS = 90;
+const LINE_WIDTH = 1;
 const LERP_SPEED = 0.10;
-const PULL_STRENGTH = 120;
-const SCALE_RANGE = 1.5;
 
-interface Dot {
-  x: number;
-  y: number;
-  scale: number;
-  pullX: number;
-  pullY: number;
-  t: number;
-}
+// Patrón de la ola — se activa cuando el cursor está cerca.
+const WAVE_FREQUENCY = 4.5;       // ciclos completos a lo ancho del canvas.
+const PHASE_PER_ROW = 0.22;       // desfase de cada fila → flujo diagonal.
+
+// Modulación con el cursor — fuera del radio: amp = 0 (líneas planas);
+// dentro: amp crece con una campana coseno hasta MAX_AMPLITUDE en el centro.
+const FOCUS_RADIUS = 0.36;
+const MAX_AMPLITUDE = 0.045;      // pico de la ondulación (fracción del alto).
+
+// Halo radial de visibilidad (alpha). Basado en `min(width, height)` para que
+// sea un círculo perceptual con mismo alcance horizontal y vertical.
+const FADE_RADIUS_FACTOR = 0.75;
 
 function getThemeColors() {
   const style = getComputedStyle(document.documentElement);
   const bg = style.getPropertyValue("--color-bg").trim() || "#f5f3ef";
-
-  // Detectar si es tema oscuro
   const isDark = bg === "#111009" || bg.toLowerCase() === "rgb(17, 16, 9)";
 
   if (isDark) {
-    // Tema oscuro: colores derivados del fondo #111009
     return {
       base: "#1c1a12",
       active: "#2a2718",
+      baseRgb: "28, 26, 18",
+      activeRgb: "42, 39, 24",
     };
   }
-
-  // Tema claro: colores exactos del usuario
   return {
     base: "#F3F0EB",
     active: "#EDE6D8",
+    baseRgb: "243, 240, 235",
+    activeRgb: "237, 230, 216",
   };
 }
 
@@ -70,29 +73,14 @@ export default function HeroOrb() {
 
     let colors = getThemeColors();
 
-    // Pre-calcular posiciones del grid
-    const dots: Dot[] = [];
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        dots.push({
-          x: (c + 0.5) / COLS,
-          y: (r + 0.5) / ROWS,
-          scale: 1,
-          pullX: 0,
-          pullY: 0,
-          t: 0,
-        });
-      }
-    }
-
-    // Estado del cursor
+    // Cursor state (todo normalizado 0–1, con 2,2 = "fuera").
     let tx = 2;
     let ty = 2;
     let mx = 2;
     let my = 2;
     let raf = 0;
     let lastFrameTime = 0;
-    let needsUpdate = true;
+
 
     function resize() {
       const rect = canvas!.parentElement!.getBoundingClientRect();
@@ -102,28 +90,22 @@ export default function HeroOrb() {
       canvas!.style.width = `${rect.width}px`;
       canvas!.style.height = `${rect.height}px`;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-      needsUpdate = true;
     }
 
     function onMove(e: MouseEvent) {
       const rect = canvas!.parentElement!.getBoundingClientRect();
       tx = (e.clientX - rect.left) / rect.width;
       ty = (e.clientY - rect.top) / rect.height;
-      needsUpdate = true;
     }
 
     function onLeave() {
       tx = 2;
       ty = 2;
-      needsUpdate = true;
     }
 
-    // Observer para detectar cambios de tema
     const observer = new MutationObserver(() => {
       colors = getThemeColors();
-      needsUpdate = true;
     });
-
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
@@ -132,115 +114,78 @@ export default function HeroOrb() {
     function draw(timestamp: number) {
       raf = requestAnimationFrame(draw);
 
-      // Limitar a 60fps
+      // Cap ~60fps.
       if (timestamp - lastFrameTime < 16) return;
       lastFrameTime = timestamp;
 
-      // Skip si no necesita update
-      if (!needsUpdate) return;
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas!.width / dpr;
+      const height = canvas!.height / dpr;
 
-      const width = canvas!.width / (window.devicePixelRatio || 1);
-      const height = canvas!.height / (window.devicePixelRatio || 1);
-
-      // Lerp
+      // Lerp suave del cursor.
       mx += (tx - mx) * LERP_SPEED;
       my += (ty - my) * LERP_SPEED;
 
-      const r2 = INFLUENCE_RADIUS * INFLUENCE_RADIUS;
+      const focusR2 = FOCUS_RADIUS * FOCUS_RADIUS;
+      const twoPiFreq = WAVE_FREQUENCY * Math.PI * 2;
 
-      // Limpiar canvas
       ctx!.clearRect(0, 0, width, height);
+      ctx!.lineWidth = LINE_WIDTH;
+      ctx!.lineCap = "round";
 
-      // Dibujar cada dot
-      for (let i = 0; i < dots.length; i++) {
-        const dot = dots[i];
-        const dotX = dot.x * width;
-        const dotY = dot.y * height;
+      // Halo radial: las líneas son visibles cerca del cursor y se desvanecen
+      // hasta alpha 0 lejos. Un solo strokeStyle para todas las filas porque
+      // el gradient vive en coordenadas del canvas.
+      const cx = mx * width;
+      const cy = my * height;
+      const fadeRadius = FADE_RADIUS_FACTOR * Math.min(width, height);
+      const gradient = ctx!.createRadialGradient(cx, cy, 0, cx, cy, fadeRadius);
+      gradient.addColorStop(0, `rgba(${colors.activeRgb}, 1)`);
+      gradient.addColorStop(0.45, `rgba(${colors.baseRgb}, 1)`);
+      gradient.addColorStop(1, `rgba(${colors.baseRgb}, 0)`);
+      ctx!.strokeStyle = gradient;
 
-        const dx = mx - dot.x;
-        const dy = my - dot.y;
-        const dist2 = dx * dx + dy * dy;
+      for (let r = 0; r < ROWS; r++) {
+        const yNorm = (r + 0.5) / ROWS;
+        const rowPhase = r * PHASE_PER_ROW;
 
-        if (dist2 < r2) {
-          // Curva suave para efecto montaña gradual
-          const linear = 1 - dist2 / r2;
-          const t = linear * linear * (3 - 2 * linear);
+        ctx!.beginPath();
+        for (let c = 0; c < COLS; c++) {
+          const xNorm = c / (COLS - 1);
 
-          // Animar hacia el objetivo - más responsivo para pico pronunciado
-          const targetScale = 1 + t * SCALE_RANGE;
-          const targetPullX = dx * t * PULL_STRENGTH;
-          const targetPullY = dy * t * PULL_STRENGTH;
-
-          dot.scale += (targetScale - dot.scale) * 0.2;
-          dot.pullX += (targetPullX - dot.pullX) * 0.2;
-          dot.pullY += (targetPullY - dot.pullY) * 0.2;
-          dot.t += (t - dot.t) * 0.2;
-
-          // Dibujar con transformación
-          const finalX = dotX + dot.pullX;
-          const finalY = dotY + dot.pullY;
-          const size = DOT_SIZE * dot.scale;
-
-          // Color: interpolar entre base y activo según proximidad
-          ctx!.fillStyle = dot.t > 0.01 ? colors.active : colors.base;
-          ctx!.globalAlpha = 1;
-
-          // Dibujar círculo
-          ctx!.beginPath();
-          ctx!.arc(finalX, finalY, size, 0, Math.PI * 2);
-          ctx!.fill();
-        } else {
-          // Volver a reposo
-          if (dot.scale !== 1 || dot.t !== 0) {
-            dot.scale += (1 - dot.scale) * 0.1;
-            dot.pullX *= 0.9;
-            dot.pullY *= 0.9;
-            dot.t += (0 - dot.t) * 0.1;
-
-            // Snap a reposo si está muy cerca
-            if (Math.abs(dot.scale - 1) < 0.001 &&
-                Math.abs(dot.pullX) < 0.01 &&
-                Math.abs(dot.pullY) < 0.01 &&
-                Math.abs(dot.t) < 0.001) {
-              dot.scale = 1;
-              dot.pullX = 0;
-              dot.pullY = 0;
-              dot.t = 0;
-            }
-
-            const finalX = dotX + dot.pullX;
-            const finalY = dotY + dot.pullY;
-            const size = DOT_SIZE * dot.scale;
-
-            ctx!.fillStyle = dot.t > 0.01 ? colors.active : colors.base;
-            ctx!.globalAlpha = 1;
-            ctx!.beginPath();
-            ctx!.arc(finalX, finalY, size, 0, Math.PI * 2);
-            ctx!.fill();
-          } else {
-            // Dot en reposo completo
-            ctx!.fillStyle = colors.base;
-            ctx!.globalAlpha = 1;
-            ctx!.beginPath();
-            ctx!.arc(dotX, dotY, DOT_SIZE, 0, Math.PI * 2);
-            ctx!.fill();
+          // Amplitud: cero en reposo, campana coseno cerca del cursor →
+          // las líneas son planas excepto en el área alrededor del puntero.
+          const dx = mx - xNorm;
+          const dy = my - yNorm;
+          const dist2 = dx * dx + dy * dy;
+          let amp = 0;
+          if (dist2 < focusR2) {
+            const dist = Math.sqrt(dist2);
+            const bell = 0.5 + 0.5 * Math.cos((dist / FOCUS_RADIUS) * Math.PI);
+            amp = bell * MAX_AMPLITUDE;
           }
-        }
-      }
 
-      ctx!.globalAlpha = 1;
-      needsUpdate = false;
+          // Onda sin animación temporal — el patrón es estático respecto al
+          // canvas. Se "revela" al pasar el cursor por encima.
+          const wave = Math.sin(xNorm * twoPiFreq + rowPhase);
+
+          const offsetY = wave * amp * height;
+          const x = xNorm * width;
+          const y = yNorm * height + offsetY;
+
+          if (c === 0) ctx!.moveTo(x, y);
+          else ctx!.lineTo(x, y);
+        }
+
+        ctx!.stroke();
+      }
     }
 
-    // Configurar canvas
     resize();
-
-    // Event listeners
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
 
-    // Iniciar loop
     raf = requestAnimationFrame(draw);
 
     return () => {

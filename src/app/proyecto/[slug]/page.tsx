@@ -79,7 +79,7 @@ export default async function Proyecto({ params }: Props) {
   return (
     <div className={styles.page}>
       {/* ── Back ── */}
-      <div className="container">
+      <div className={styles.backWrap}>
         <Link href="/proyectos" className={styles.back}>
           ← Todos los proyectos
         </Link>
@@ -87,7 +87,6 @@ export default async function Proyecto({ params }: Props) {
 
       {/* ── Header ── */}
       <header className={styles.header}>
-        <p className={styles.category}>Proyecto principal</p>
         <h1 className={styles.title}>{project.title}</h1>
         {project.subtitle && <p className={styles.subtitle}>{project.subtitle}</p>}
         {tags.length > 0 && (

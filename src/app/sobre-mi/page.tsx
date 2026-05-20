@@ -45,14 +45,29 @@ export default async function SobreMi() {
         </div>
         <p className={styles.eyebrow}>Sobre mí</p>
         <h1 className={styles.name}>{profile.name}</h1>
-        {profile.role && <p className={styles.role}>{profile.role}</p>}
         {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
       </section>
 
+      {/* ── Servicios / Skills ──────────────────────────────── */}
+      {(profile.services?.length > 0 || profile.skills?.length > 0) && (
+        <section className={styles.block}>
+          <div className={styles.chipList}>
+            {profile.services?.map((s) => (
+              <span key={`s-${s}`} className={styles.chip}>
+                {s}
+              </span>
+            ))}
+            {profile.skills?.map((s) => (
+              <span key={`k-${s}`} className={styles.chip}>
+                {s}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
       {/* ── Formación + Idiomas ─────────────────────────────── */}
       {(profile.formacion?.length > 0 || profile.languages?.length > 0) && (
         <section className={styles.block}>
-          <p className="section-label">Formación</p>
           <div className={styles.cards}>
             {profile.formacion?.map((item, i) => (
               <div key={i} className={styles.card}>
@@ -85,30 +100,15 @@ export default async function SobreMi() {
         </section>
       )}
 
-      {/* ── Servicios / Skills ──────────────────────────────── */}
-      {(profile.services?.length > 0 || profile.skills?.length > 0) && (
-        <section className={styles.block}>
-          <p className="section-label">Lo que hago</p>
-          <div className={styles.chipList}>
-            {profile.services?.map((s) => (
-              <span key={`s-${s}`} className={styles.chip}>
-                {s}
-              </span>
-            ))}
-            {profile.skills?.map((s) => (
-              <span key={`k-${s}`} className={styles.chip}>
-                {s}
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* ── CTAs ────────────────────────────────────────────── */}
       <section className={styles.cta}>
+        <span className={`${styles.badge} ${styles.badgePrimary}`}>
+          Trabajemos juntos
+        </span>
         <h2 className={styles.ctaTitle}>¿Hablamos?</h2>
         <p className={styles.ctaSub}>
-          Cuéntame qué tienes entre manos. Respondo en menos de 24h, casi siempre antes.
+          Contáctame, ya sea para unirme a tu equipo como para colaborar juntos, estoy disponible para nuevos desafíos.
         </p>
         <div className={styles.ctaButtons}>
           <a
