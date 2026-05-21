@@ -41,6 +41,11 @@
   gap: var(--space-3);
 }
 
+.themeToggleWrap {
+  display: flex;
+  align-items: center;
+}
+
 .link {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);

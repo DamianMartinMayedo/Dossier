@@ -54,13 +54,14 @@ export default function AdminNav({ userEmail }: Props) {
   }
 
   // El contenido del nav lo reusan sidebar (desktop) y drawer (móvil).
-  const NavContent = (
+  // En el drawer, el ThemeToggle va abajo para no solaparse con el botón de cerrar.
+  const NavContent = ({ isDrawer }: { isDrawer?: boolean }) => (
     <>
       <div className={styles.header}>
         <Link href="/admin" className={styles.brandLink}>
           Admin
         </Link>
-        <ThemeToggle />
+        {!isDrawer && <ThemeToggle />}
       </div>
 
       <nav className={styles.nav}>
@@ -76,6 +77,11 @@ export default function AdminNav({ userEmail }: Props) {
       </nav>
 
       <div className={styles.bottom}>
+        {isDrawer && (
+          <div className={styles.themeToggleWrap}>
+            <ThemeToggle />
+          </div>
+        )}
         <div className={styles.bottomRow}>
           <span className={styles.email}>{userEmail}</span>
         </div>
@@ -105,7 +111,7 @@ export default function AdminNav({ userEmail }: Props) {
       </header>
 
       {/* Sidebar (sticky en desktop, oculto en móvil via CSS). */}
-      <aside className={styles.sidebar}>{NavContent}</aside>
+      <aside className={styles.sidebar}><NavContent /></aside>
 
       {/* Drawer móvil — sólo cuando está abierto. */}
       {drawerOpen && (
@@ -129,7 +135,7 @@ export default function AdminNav({ userEmail }: Props) {
             >
               <X size={20} aria-hidden="true" />
             </button>
-            {NavContent}
+            <NavContent isDrawer />
           </aside>
         </div>
       )}
