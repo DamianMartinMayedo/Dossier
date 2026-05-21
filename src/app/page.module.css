@@ -248,6 +248,11 @@
   margin-bottom: var(--space-3);
 }
 
+/* Quita el border-bottom global de .section para evitar solapamiento con la siguiente sección. */
+.aboutSection {
+  border-bottom: none;
+}
+
 .aboutTitle {
   font-size: var(--text-2xl);
   font-weight: 700;

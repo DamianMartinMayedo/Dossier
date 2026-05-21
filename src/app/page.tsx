@@ -82,7 +82,7 @@ export default async function Home() {
         </section>
 
         {/* SOBRE MÍ — teaser compacto, detalle en /sobre-mi */}
-        <section className="section" id="sobre">
+        <section className={`section ${styles.aboutSection}`} id="sobre">
           <div className="container">
             <div className={styles.aboutTeaser}>
               <p className="section-label">Sobre mí</p>
