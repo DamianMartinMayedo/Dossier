@@ -5,24 +5,33 @@ import styles from "./HeroOrb.module.css";
 
 /**
  * Fondo interactivo del hero: grid de líneas horizontales planas EN REPOSO.
- * El cursor "provoca" una ondulación sinusoidal a su alrededor — las líneas
- * cercanas se curvan en patrón sin() con desfase entre filas (flujo tipo
- * tela ondulada). Sin animación temporal: el patrón es estático y sólo se
- * mueve cuando el ratón se mueve.
  *
- * Implementación con Canvas 2D:
- * - 1 path por fila → polilínea con muchos puntos siguiendo un sin().
- * - La amplitud está modulada radialmente por una campana coseno centrada
- *   en el cursor: 0 fuera del FOCUS_RADIUS, máxima en el puntero.
- * - Halo radial controla la alpha → la ola se ve sólo donde el cursor está.
+ * Dos modos según el dispositivo:
  *
- * Sin efecto en touch / reduced-motion.
+ * 1. **Cursor mode** (desktop con ratón fino): el cursor provoca una ondulación
+ *    sinusoidal a su alrededor — las líneas cercanas se curvan en patrón sin()
+ *    con desfase entre filas. Estático respecto al canvas; sólo se mueve
+ *    cuando el ratón se mueve.
+ *
+ * 2. **Ambient mode** (touch / `hover: none`): el foco de la ola se mueve
+ *    automáticamente trazando una figura Lissajous lenta. Misma estética que
+ *    el desktop, pero sin necesidad de cursor. Densidad reducida para que en
+ *    móvil no consuma GPU innecesaria.
+ *
+ * Ambos respetan `prefers-reduced-motion: reduce` → no se monta nada.
+ *
+ * Implementación: 1 path por fila → polilínea con muchos puntos siguiendo
+ * sin(). Amplitud modulada por campana coseno centrada en el foco. Halo
+ * radial controla la alpha para que la ola sea visible sólo en el área del
+ * foco.
  */
 
 const COLS = 140;
-const ROWS = 90;
+const ROWS_DESKTOP = 90;
+const ROWS_MOBILE = 60;
 const LINE_WIDTH = 1;
-const LERP_SPEED = 0.10;
+const LERP_SPEED_DESKTOP = 0.10;
+const LERP_SPEED_MOBILE = 0.04;
 
 // Patrón de la ola — se activa cuando el cursor está cerca.
 const WAVE_FREQUENCY = 4.5;       // ciclos completos a lo ancho del canvas.
@@ -62,7 +71,6 @@ export default function HeroOrb() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (window.matchMedia("(hover: none)").matches) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const canvas = canvasRef.current;
@@ -71,13 +79,20 @@ export default function HeroOrb() {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
+    // Si el dispositivo no tiene puntero fino (móvil / touch), activamos el
+    // modo ambient: el foco de la ola se mueve solo via Lissajous, sin cursor.
+    const isAmbient = window.matchMedia("(hover: none)").matches;
+    const ROWS = isAmbient ? ROWS_MOBILE : ROWS_DESKTOP;
+    const LERP_SPEED = isAmbient ? LERP_SPEED_MOBILE : LERP_SPEED_DESKTOP;
+
     let colors = getThemeColors();
 
     // Cursor state (todo normalizado 0–1, con 2,2 = "fuera").
-    let tx = 2;
-    let ty = 2;
-    let mx = 2;
-    let my = 2;
+    // En modo ambient, tx/ty se recalculan en cada frame a partir del tiempo.
+    let tx = isAmbient ? 0.5 : 2;
+    let ty = isAmbient ? 0.5 : 2;
+    let mx = tx;
+    let my = ty;
     let raf = 0;
     let lastFrameTime = 0;
 
@@ -122,7 +137,16 @@ export default function HeroOrb() {
       const width = canvas!.width / dpr;
       const height = canvas!.height / dpr;
 
-      // Lerp suave del cursor.
+      // En modo ambient, generamos el foco via Lissajous en función del tiempo.
+      // Frecuencias 0.7 y 1.1 son incomensurables → la trayectoria no se repite
+      // exactamente cada ciclo, sensación viva sin loop perceptible.
+      if (isAmbient) {
+        const t = timestamp * 0.0001; // ~10s por unidad
+        tx = 0.5 + 0.32 * Math.sin(t * 0.7);
+        ty = 0.5 + 0.22 * Math.cos(t * 1.1);
+      }
+
+      // Lerp suave del cursor (en ambient: hacia el target Lissajous).
       mx += (tx - mx) * LERP_SPEED;
       my += (ty - my) * LERP_SPEED;
 
@@ -183,15 +207,20 @@ export default function HeroOrb() {
 
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("mousemove", onMove, { passive: true });
-    document.addEventListener("mouseleave", onLeave);
+    // En ambient no nos suscribimos al cursor — el foco viene del tiempo.
+    if (!isAmbient) {
+      window.addEventListener("mousemove", onMove, { passive: true });
+      document.addEventListener("mouseleave", onLeave);
+    }
 
     raf = requestAnimationFrame(draw);
 
     return () => {
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseleave", onLeave);
+      if (!isAmbient) {
+        window.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseleave", onLeave);
+      }
       observer.disconnect();
       cancelAnimationFrame(raf);
     };

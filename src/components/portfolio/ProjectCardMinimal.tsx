@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { X } from "lucide-react";
 import { getProjectCover } from "@/lib/utils";
 import type { Project } from "@/types";
 import ProjectThumb from "./ProjectThumb";
@@ -93,7 +94,7 @@ export default function ProjectCardMinimal({ project }: Props) {
           type="button"
           aria-label="Cerrar"
         >
-          ×
+          <X size={20} aria-hidden="true" />
         </button>
         {cover && (
           <div className={styles.modalImgWrap}>

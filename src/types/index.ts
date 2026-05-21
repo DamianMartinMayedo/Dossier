@@ -39,9 +39,13 @@ export interface GalleryBlock extends BaseBlock {
   columns: 1 | 2 | 3;
 }
 
+export type CarouselOrientation = "vertical" | "horizontal";
+
 export interface CarouselBlock extends BaseBlock {
   type: "carousel";
   images: GalleryImage[];
+  /** "vertical" (9:16 tipo móvil, default) o "horizontal" (4:3). */
+  orientation?: CarouselOrientation;
 }
 
 export type TwoColumnsRatio = "1:1" | "1:2" | "2:1";

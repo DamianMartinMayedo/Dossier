@@ -3,6 +3,7 @@
 
 import { v4 as uuidv4 } from "uuid";
 import type {
+  CarouselOrientation,
   ContentBlock,
   ContentBlockType,
   ImageWidth,
@@ -30,6 +31,7 @@ export const SIMPLE_BLOCK_TYPES: readonly SimpleBlockType[] = [
 
 const IMAGE_WIDTHS: readonly ImageWidth[] = ["contained", "wide", "full"] as const;
 const TWO_COL_RATIOS: readonly TwoColumnsRatio[] = ["1:1", "1:2", "2:1"] as const;
+const CAROUSEL_ORIENTATIONS: readonly CarouselOrientation[] = ["vertical", "horizontal"] as const;
 
 /** Crea un sub-bloque "simple" (los que pueden ir dentro de TwoColumns). */
 export function createSimpleBlock(type: SimpleBlockType): SimpleBlock {
@@ -44,7 +46,7 @@ export function createSimpleBlock(type: SimpleBlockType): SimpleBlock {
     case "gallery":
       return { id, type, images: [], columns: 1 };
     case "carousel":
-      return { id, type, images: [] };
+      return { id, type, images: [], orientation: "vertical" };
   }
 }
 
@@ -110,7 +112,14 @@ function validateGallery(b: Record<string, unknown>): boolean {
 }
 
 function validateCarousel(b: Record<string, unknown>): boolean {
-  return validateGalleryImages(b.images);
+  if (!validateGalleryImages(b.images)) return false;
+  // orientation es opcional (los carrouseles antiguos no lo tienen → vertical default).
+  if (b.orientation !== undefined) {
+    if (!isStr(b.orientation) || !CAROUSEL_ORIENTATIONS.includes(b.orientation as CarouselOrientation)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function isValidSimpleSide(v: unknown): boolean {

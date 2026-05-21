@@ -169,3 +169,27 @@
 .galleryImg {
   object-fit: cover;
 }
+
+/* ── Móvil: padding más estrecho + header image menos panorámico ── */
+@media (max-width: 640px) {
+  .backWrap,
+  .header {
+    padding-inline: var(--space-4);
+  }
+  .header {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-3);
+  }
+  .headerImageInner {
+    /* 21/9 es excesivamente bajo en móvil — pasa a 16/9. */
+    aspect-ratio: 16 / 9;
+  }
+  .subtitle {
+    font-size: var(--text-base);
+  }
+  .body,
+  .cover,
+  .gallery {
+    padding-inline: var(--space-4);
+  }
+}

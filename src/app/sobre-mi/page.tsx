@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import type { Profile } from "@/types";
 import { CONTACT } from "@/lib/contact";
@@ -117,10 +118,10 @@ export default async function SobreMi() {
             rel="noopener noreferrer"
             className={styles.btnPrimary}
           >
-            WhatsApp <span>↗</span>
+            WhatsApp <ArrowUpRight size={14} aria-hidden="true" />
           </a>
           <a href={`mailto:${CONTACT.email}`} className={styles.btnPrimary}>
-            Email <span>↗</span>
+            Email <ArrowUpRight size={14} aria-hidden="true" />
           </a>
         </div>
       </section>

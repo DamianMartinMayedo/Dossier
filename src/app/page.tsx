@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
 import FeaturedMarquee from "@/components/portfolio/FeaturedMarquee";
 import Marquee from "@/components/portfolio/Marquee";
 import CollabGrid from "@/components/portfolio/CollabGrid";
@@ -44,7 +45,7 @@ export default async function Home() {
               </p>
               <div className={styles.ctaRow}>
                 <a href="#proyectos" className={styles.btnPrimary}>
-                  Ver proyectos <span>↓</span>
+                  Ver proyectos <ArrowDown size={14} aria-hidden="true" />
                 </a>
                 <a href="#contacto" className={styles.btnSecondary}>
                   Hablemos
@@ -66,7 +67,7 @@ export default async function Home() {
                 <h2 className="section-title">Trabajos destacados</h2>
               </div>
               <a href="/proyectos" className={styles.arrowLink}>
-                Ver todos <span>→</span>
+                Ver todos <ArrowRight size={14} aria-hidden="true" />
               </a>
             </div>
 
@@ -92,7 +93,7 @@ export default async function Home() {
                 Tengo experiencia en procesos completos de UI/UX (end to end), creando identidades corporativas, sistemas visuales y piezas para web, RRSS, impresos y producto digital en general.
               </p>
               <a href="/sobre-mi" className={styles.arrowLink}>
-                Más sobre mí <span>→</span>
+                Más sobre mí <ArrowRight size={14} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -115,10 +116,10 @@ export default async function Home() {
             </p>
             <div className={styles.contactCta}>
               <a href={CONTACT.whatsapp} target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
-                WhatsApp <span>↗</span>
+                WhatsApp <ArrowUpRight size={14} aria-hidden="true" />
               </a>
               <a href={`mailto:${CONTACT.email}`} className={styles.btnPrimary}>
-                Email <span>↗</span>
+                Email <ArrowUpRight size={14} aria-hidden="true" />
               </a>
             </div>
           </div>

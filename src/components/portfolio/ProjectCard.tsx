@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import type { Project } from "@/types";
 import ProjectThumb from "./ProjectThumb";
 import styles from "./ProjectCard.module.css";
@@ -67,7 +68,7 @@ export default function ProjectCard({ project, featured, span = 6, variant = "li
                 {project.year && <span className={styles.year}>{project.year}</span>}
               </div>
               <span className={styles.arrow}>
-                Ver <span>→</span>
+                Ver <ArrowRight size={14} aria-hidden="true" />
               </span>
             </div>
           </div>

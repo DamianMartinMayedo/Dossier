@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import type { ContentBlock, Project } from "@/types";
 import ProjectContent from "@/components/portfolio/ProjectContent";
@@ -81,7 +82,7 @@ export default async function Proyecto({ params }: Props) {
       {/* ── Back ── */}
       <div className={styles.backWrap}>
         <Link href="/proyectos" className={styles.back}>
-          ← Todos los proyectos
+          <ArrowLeft size={14} aria-hidden="true" /> Todos los proyectos
         </Link>
       </div>
 

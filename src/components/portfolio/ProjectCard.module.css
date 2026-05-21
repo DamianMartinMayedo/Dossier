@@ -215,11 +215,13 @@
   gap: var(--space-3);
 }
 
+.arrow svg,
 .arrow span {
   transition: transform var(--transition-interactive);
   display: inline-block;
 }
 
+.card:hover .arrow svg,
 .card:hover .arrow span {
   transform: translateX(2px);
 }

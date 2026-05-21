@@ -78,3 +78,126 @@
   background-image: none;
   -webkit-text-fill-color: var(--color-primary);
 }
+
+/* ── Hamburger (solo móvil) ────────────────────────────────── */
+.hamburger {
+  display: none;
+  background: transparent;
+  border: none;
+  padding: var(--space-2);
+  margin: calc(var(--space-2) * -1);
+  cursor: pointer;
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-interactive);
+}
+
+.hamburger:hover {
+  background: var(--color-surface-offset);
+}
+
+/* ── Overlay full-screen (solo móvil cuando está abierto) ──── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  padding: var(--space-8);
+  animation: overlay-in 200ms ease-out;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.overlayClose {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background var(--transition-interactive),
+              color var(--transition-interactive);
+}
+
+.overlayClose:hover {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+
+.overlayNav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  align-items: center;
+  animation: overlay-links-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) 80ms backwards;
+}
+
+@keyframes overlay-links-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.overlayLink {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--color-text);
+  padding-block: var(--space-2);
+  transition: color var(--transition-interactive);
+}
+
+.overlayLink:hover {
+  color: var(--color-primary);
+}
+
+.overlayLinkActive,
+.overlayLinkActive:hover {
+  color: var(--color-primary);
+}
+
+.overlayFooter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlayNav {
+    animation: none;
+  }
+}
+
+/* ── Breakpoint mobile: <640px ─────────────────────────────── */
+@media (max-width: 640px) {
+  .nav {
+    display: none;
+  }
+  .hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logoSvg {
+    height: 22px;
+  }
+  .inner {
+    padding-inline: var(--space-4);
+  }
+}

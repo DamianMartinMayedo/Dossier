@@ -21,21 +21,7 @@ export default async function EditarProyecto({ params }: Props) {
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <div>
-          <p className="section-label">Proyectos</p>
-          <h1 className={styles.title}>Editar proyecto</h1>
-        </div>
-        <div className={styles.actions}>
-          <button type="submit" form="project-form" className={styles.submitBtn}>
-            Actualizar
-          </button>
-          <button type="button" form="project-form" className={styles.deleteBtn}>
-            Eliminar
-          </button>
-        </div>
-      </div>
-      <ProjectForm project={project} />
+      <ProjectForm project={project} title="Editar proyecto" />
     </div>
   );
 }

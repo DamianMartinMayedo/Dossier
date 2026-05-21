@@ -35,7 +35,7 @@ export default function FeaturedMarquee({ projects }: Props) {
     const track = trackRef.current;
     if (!viewport || !track) return;
 
-    const SPEED = Math.min(70, Math.max(30, projects.length * 5));
+    const SPEED = Math.min(120, Math.max(60, projects.length * 8));
     const DRAG_THRESHOLD = 5; // px antes de considerar que es un drag.
 
     let raf = 0;

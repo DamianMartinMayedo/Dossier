@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { CarouselBlock, GalleryImage } from "@/types";
+import type { CarouselBlock, CarouselOrientation, GalleryImage } from "@/types";
 import Dropzone from "../Dropzone";
 import { useFileUpload } from "../useFileUpload";
 import styles from "./BlockFields.module.css";
@@ -11,8 +11,17 @@ interface Props {
   onChange: (next: CarouselBlock) => void;
 }
 
+const ORIENTATION_LABELS: Record<CarouselOrientation, string> = {
+  vertical: "Vertical (9:16, tipo móvil)",
+  horizontal: "Horizontal (4:3, paisaje)",
+};
+
 export default function BlockCarouselForm({ block, onChange }: Props) {
   const { uploading, error, upload } = useFileUpload();
+
+  // Default a vertical para los carrouseles existentes que no tienen el campo
+  // todavía persistido en DB.
+  const orientation: CarouselOrientation = block.orientation ?? "vertical";
 
   async function handleFiles(files: File[]) {
     if (files.length === 0) return;
@@ -37,6 +46,25 @@ export default function BlockCarouselForm({ block, onChange }: Props) {
 
   return (
     <>
+      <div className={styles.row}>
+        <div className={styles.field}>
+          <label className={styles.label}>Orientación</label>
+          <select
+            className={styles.select}
+            value={orientation}
+            onChange={(e) =>
+              onChange({ ...block, orientation: e.target.value as CarouselOrientation })
+            }
+          >
+            {(Object.keys(ORIENTATION_LABELS) as CarouselOrientation[]).map((o) => (
+              <option key={o} value={o}>
+                {ORIENTATION_LABELS[o]}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {block.images.length > 0 && (
         <div className={styles.imageList}>
           {block.images.map((img, i) => (

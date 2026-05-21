@@ -1,11 +1,16 @@
-/* ── Carrusel marquee infinito ────────────────────────────
+/* ── Carrusel marquee infinito (scroll-based) ──────────────────
  *
- * Estrategia: duplicamos las imágenes en el TSX y animamos el track
- * con translateX(-50%) — al llegar a la mitad, el contenido visible
- * coincide pixel-perfect con el inicio, así el loop es invisible.
+ * Estrategia: el viewport tiene overflow-x:auto y JS anima `scrollLeft`
+ * vía RAF. Al cruzar la mitad del track (lista duplicada) restamos esa
+ * mitad → loop invisible. Esto permite drag-scroll con el ratón sin
+ * pelearse con una animación CSS de transform.
  *
- * Pausa al hover/focus para que se puedan ver bien las imágenes.
- * Respeta prefers-reduced-motion deteniendo la animación.
+ * Soporta dos orientaciones de items:
+ *  - `.vertical` (default): aspect 9/16 tipo móvil (180/240px de ancho).
+ *  - `.horizontal`: aspect 4/3 tipo paisaje (280/360px de ancho).
+ *
+ * Click en una imagen → abre lightbox con zoom-in cinematográfico
+ * (mismo efecto que las cards secundarias).
  */
 
 .wrap {
@@ -17,70 +22,72 @@
 
 .viewport {
   width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.grabbing {
+  cursor: grabbing;
 }
 
 .track {
   display: flex;
   gap: var(--space-4);
   width: max-content;
-  will-change: transform;
-  animation: marquee var(--marquee-duration, 30s) linear infinite;
+  /* Padding mínimo para que el shine/borde de los items no se corte. */
+  padding-block: var(--space-1);
 }
 
-.wrap:hover .track,
-.wrap:focus-within .track {
-  animation-play-state: paused;
-}
-
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    /* -50% es el ancho de UNA copia. Combinado con el gap, al duplicar
-       items, el desplazamiento es exactamente continuo. */
-    transform: translateX(calc(-50% - var(--space-4) / 2));
-  }
-}
-
+/* ── Item ───────────────────────────────────────────────────── */
 .item {
   position: relative;
-  flex: 0 0 180px;
-  aspect-ratio: 9 / 16;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--color-surface-offset);
   border: 1px solid var(--color-border);
+  /* Botón → reset visual */
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--transition-interactive);
+}
+
+.item:hover {
+  transform: scale(1.015);
+}
+
+/* ── Variante vertical (9/16, mobile-screenshot) ───────────── */
+.vertical .item {
+  flex: 0 0 180px;
+  aspect-ratio: 9 / 16;
 }
 
 @media (min-width: 640px) {
-  .item {
+  .vertical .item {
     flex: 0 0 240px;
   }
 }
 
-@media (min-width: 640px) {
-  .item {
-    height: 400px;
-  }
+/* ── Variante horizontal (4/3, paisaje) ────────────────────── */
+.horizontal .item {
+  flex: 0 0 280px;
+  aspect-ratio: 4 / 3;
 }
 
 @media (min-width: 640px) {
-  .item {
-    height: 400px;
-  }
-}
-
-@media (min-width: 640px) {
-  .item {
-    height: 400px;
-  }
-}
-
-@media (min-width: 640px) {
-  .item {
-    height: 360px;
+  .horizontal .item {
+    flex: 0 0 360px;
   }
 }
 
@@ -94,29 +101,153 @@
   padding-inline: 0;
 }
 
-.embedded .item {
+.embedded.vertical .item {
   flex: 0 0 140px;
 }
 
+.embedded.horizontal .item {
+  flex: 0 0 220px;
+}
+
 @media (min-width: 640px) {
-  .embedded .item {
+  .embedded.vertical .item {
     flex: 0 0 180px;
+  }
+  .embedded.horizontal .item {
+    flex: 0 0 280px;
   }
 }
 
-/* ── Accesibilidad: respeta el ajuste del usuario ─────── */
-@media (prefers-reduced-motion: reduce) {
-  .track {
-    animation: none;
-    /* Si el usuario prefiere menos movimiento, dejamos el carrusel
-       como scroll manual con snap, mostrando sólo la primera mitad. */
-    width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
+/* ── Lightbox (native <dialog>) ─────────────────────────────── */
+.modal {
+  border: none;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  inset: 0;
+  color: var(--color-text);
+  cursor: zoom-out;
+}
 
-  .item {
-    scroll-snap-align: center;
+.modal:not([open]) {
+  display: none;
+}
+
+.modal[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  animation: cb-modal-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cb-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+  animation: cb-backdrop-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cb-backdrop-fade-in {
+  from { background: rgba(0, 0, 0, 0); }
+  to { background: rgba(0, 0, 0, 0.85); }
+}
+
+.modalClose,
+.modalNav {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background var(--transition-interactive);
+}
+
+.modalClose {
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  font-size: 1.5rem;
+}
+
+.modalNav {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.modalPrev {
+  left: var(--space-4);
+}
+
+.modalNext {
+  right: var(--space-4);
+}
+
+.modalClose:hover,
+.modalNav:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.modalImgWrap {
+  position: relative;
+  /* Default = vertical: pantalla más estrecha y alta. */
+  width: min(60vw, 600px);
+  height: min(85vh, 1000px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  /* Zoom-in cinematográfico — mismo easing que el lightbox de secundarios. */
+  animation: cb-lightbox-zoom 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  cursor: default;
+}
+
+.modalImgWrapHorizontal {
+  /* Horizontal: cuadro más ancho y bajo, respetando 4:3. */
+  width: min(92vw, 1400px);
+  height: min(75vh, 1050px);
+}
+
+@keyframes cb-lightbox-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalImg {
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open],
+  .modal::backdrop,
+  .modalImgWrap {
+    animation: none;
+  }
+  .item:hover {
+    transform: none;
   }
 }

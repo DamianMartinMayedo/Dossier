@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 import type { Profile, ProfileFormacionItem, ProfileStat } from "@/types";
 import Dropzone from "./Dropzone";
 import { useFileUpload } from "./useFileUpload";
@@ -189,7 +190,7 @@ export default function ProfileForm({ profile }: Props) {
                 onClick={() => removeFormacion(i)}
                 aria-label="Eliminar"
               >
-                ×
+                <X size={14} aria-hidden="true" />
               </button>
             </div>
             <div className={styles.field}>
@@ -240,7 +241,7 @@ export default function ProfileForm({ profile }: Props) {
                 onClick={() => removeStat(i)}
                 aria-label="Eliminar"
               >
-                ×
+                <X size={14} aria-hidden="true" />
               </button>
             </div>
             <div className={styles.row}>

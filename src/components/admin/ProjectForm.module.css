@@ -4,50 +4,146 @@
   gap: var(--space-5);
 }
 
-/* ── Back button (flecha "Volver a Proyectos") ──────────── */
-.backBtn {
-  align-self: flex-start;
-  display: inline-flex;
+/* ── Cabecera sticky del editor de proyecto ──────────────────────
+   Contiene: back arrow + título + acciones (Actualizar/Crear + Eliminar).
+   Se mantiene pegada arriba del main al hacer scroll. */
+.pageHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
-  margin-bottom: var(--space-4);
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
-  font-family: inherit;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  margin-bottom: var(--space-6);
+  background: var(--color-surface);
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.headerTitleBox {
+  min-width: 0;
+}
+
+.headerTitle {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.headerSubmit {
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-text);
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
+  transition: opacity var(--transition-interactive),
+              background var(--transition-interactive),
+              border-color var(--transition-interactive);
+}
+
+.headerSubmit:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.headerSubmit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.headerDelete {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
   border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--transition-interactive);
+}
+
+.headerDelete:hover {
+  background: var(--color-error-bg);
+}
+
+/* ── Back button (flecha) — chip circular en la cabecera ───────── */
+.backBtn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
   transition: background var(--transition-interactive),
               color var(--transition-interactive),
-              gap var(--transition-interactive);
+              transform var(--transition-interactive);
 }
 
 .backBtn:hover {
-  background: var(--color-surface-offset);
-  color: var(--color-text);
-  gap: var(--space-3);
-}
-
-.backBtn:hover span:first-child {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
   transform: translateX(-2px);
 }
 
 .backBtn span:first-child {
-  font-size: 1.1em;
+  font-size: 1em;
+  line-height: 1;
   display: inline-block;
-  transition: transform var(--transition-interactive);
 }
 
-/* Punto rojo indicador de cambios pendientes. */
+/* Punto rojo indicador de cambios pendientes — flota arriba derecha del back. */
 .dirtyDot {
-  width: 8px;
-  height: 8px;
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
+  border: 2px solid var(--color-surface);
   display: inline-block;
+}
+
+@media (max-width: 720px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .headerActions {
+    justify-content: flex-end;
+  }
 }
 
 /* ── Modal "cambios sin guardar" ────────────────────────── */

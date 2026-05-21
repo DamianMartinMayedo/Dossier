@@ -27,7 +27,7 @@
   align-items: center;
   gap: var(--space-12);
   width: max-content;
-  animation: logo-scroll 40s linear infinite;
+  animation: logo-scroll 22s linear infinite;
 }
 
 .wrap:hover .track {

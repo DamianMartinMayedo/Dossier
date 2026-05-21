@@ -15,3 +15,14 @@
     padding: var(--space-8) var(--space-8);
   }
 }
+
+/* En móvil el AdminNav renderiza un top bar sticky + drawer; el layout pasa
+   a columna para que el main quede debajo del top bar. */
+@media (max-width: 959px) {
+  .layout {
+    flex-direction: column;
+  }
+  .main {
+    padding: var(--space-5) var(--space-4);
+  }
+}

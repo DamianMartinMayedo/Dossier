@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { slugify } from "@/lib/utils";
 import type { ContentBlock, Project, ProjectFormData } from "@/types";
 import { deleteAdminFiles } from "@/lib/admin-upload";
@@ -15,9 +16,11 @@ import styles from "./ProjectForm.module.css";
 
 interface Props {
   project?: Project;
+  /** Texto del h1 mostrado en la cabecera sticky (e.g. "Editar proyecto"). */
+  title: string;
 }
 
-export default function ProjectForm({ project }: Props) {
+export default function ProjectForm({ project, title }: Props) {
   const router = useRouter();
   const isEditing = !!project;
 
@@ -202,15 +205,45 @@ export default function ProjectForm({ project }: Props) {
 
   return (
     <>
-    <button
-      type="button"
-      onClick={handleBack}
-      className={styles.backBtn}
-      aria-label="Volver a Proyectos"
-    >
-      <span aria-hidden="true">←</span> Volver a Proyectos
-      {isDirty && <span className={styles.dirtyDot} aria-label="cambios sin guardar" />}
-    </button>
+    {/* Cabecera sticky con back, título y acciones. Vive fuera del <form>
+        para no anidar botones que se sumitearían sin querer; el botón
+        "Actualizar/Crear" se enlaza con el form vía `form="project-form"`. */}
+    <header className={styles.pageHeader}>
+      <div className={styles.headerLeft}>
+        <button
+          type="button"
+          onClick={handleBack}
+          className={styles.backBtn}
+          aria-label="Volver a Proyectos"
+        >
+          <ArrowLeft size={18} aria-hidden="true" />
+          {isDirty && <span className={styles.dirtyDot} aria-label="cambios sin guardar" />}
+        </button>
+        <div className={styles.headerTitleBox}>
+          <p className="section-label">Proyectos</p>
+          <h1 className={styles.headerTitle}>{title}</h1>
+        </div>
+      </div>
+      <div className={styles.headerActions}>
+        <button
+          type="submit"
+          form="project-form"
+          className={styles.headerSubmit}
+          disabled={loading}
+        >
+          {loading ? "Guardando…" : isEditing ? "Actualizar" : "Crear proyecto"}
+        </button>
+        {isEditing && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className={styles.headerDelete}
+          >
+            Eliminar
+          </button>
+        )}
+      </div>
+    </header>
 
     <form id="project-form" onSubmit={handleSubmit} className={styles.form}>
       {error && <p className={styles.error}>{error}</p>}

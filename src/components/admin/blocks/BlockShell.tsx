@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { ArrowUp, ArrowDown, X } from "lucide-react";
 import type { ContentBlock } from "@/types";
 import { BLOCK_LABELS, blockSummary } from "@/lib/blocks";
 import BlockPreview from "../BlockPreview";
@@ -81,7 +82,7 @@ export default function BlockShell({
             aria-label="Subir bloque"
             title="Subir"
           >
-            ↑
+            <ArrowUp size={14} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -91,7 +92,7 @@ export default function BlockShell({
             aria-label="Bajar bloque"
             title="Bajar"
           >
-            ↓
+            <ArrowDown size={14} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -100,7 +101,7 @@ export default function BlockShell({
             aria-label="Eliminar bloque"
             title="Eliminar"
           >
-            ×
+            <X size={14} aria-hidden="true" />
           </button>
         </div>
       </header>

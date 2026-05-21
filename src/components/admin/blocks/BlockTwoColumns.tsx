@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { X } from "lucide-react";
 import type {
   SimpleBlock,
   SimpleBlockType,
@@ -108,7 +109,7 @@ function ColumnEditor({
             aria-label="Quitar columna"
             title="Quitar"
           >
-            ×
+            <X size={14} aria-hidden="true" />
           </button>
         </div>
       </header>

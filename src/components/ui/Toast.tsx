@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { X } from "lucide-react";
 import styles from "./Toast.module.css";
 
 interface Props {
@@ -44,7 +45,7 @@ export default function Toast({
         className={styles.closeBtn}
         aria-label="Cerrar notificación"
       >
-        ×
+        <X size={16} aria-hidden="true" />
       </button>
     </div>
   );
