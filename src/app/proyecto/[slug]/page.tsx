@@ -2,10 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import type { ContentBlock, Project } from "@/types";
 import ProjectContent from "@/components/portfolio/ProjectContent";
+import ScrollToTop from "@/components/ui/ScrollToTop";
+import BackNav from "@/components/portfolio/BackNav";
+import ScrollTopButton from "@/components/portfolio/ScrollTopButton";
 import styles from "./page.module.css";
 
 interface Props {
@@ -78,13 +80,11 @@ export default async function Proyecto({ params }: Props) {
   const hasBlocks = blocks.length > 0;
 
   return (
-    <div className={styles.page}>
+    <>
+      <ScrollToTop />
+      <div className={styles.page}>
       {/* ── Back ── */}
-      <div className={styles.backWrap}>
-        <Link href="/proyectos" className={styles.back}>
-          <ArrowLeft size={14} aria-hidden="true" /> Todos los proyectos
-        </Link>
-      </div>
+      <BackNav />
 
       {/* ── Header ── */}
       <header className={styles.header}>
@@ -162,6 +162,16 @@ export default async function Proyecto({ params }: Props) {
           )}
         </>
       )}
+
+      {/* ── Bottom CTA ── */}
+      <div className={styles.bottomCta}>
+        <Link href="/proyectos" className={styles.btnSecondary}>
+          Ver todos los proyectos <span>→</span>
+        </Link>
+      </div>
+
+      <ScrollTopButton />
     </div>
+    </>
   );
 }

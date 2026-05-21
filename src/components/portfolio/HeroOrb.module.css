@@ -13,7 +13,12 @@
   position: fixed;
   inset: 0;
   width: 100vw;
+  /* `100dvh` se ajusta dinámicamente a la altura real del viewport en iOS Safari
+     (que oculta/muestra la URL bar). `100vh` puede reportar 0 o un valor inicial
+     incorrecto en móvil, dejando el canvas invisible. Fallback a 100vh para
+     navegadores muy antiguos sin soporte dvh. */
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;

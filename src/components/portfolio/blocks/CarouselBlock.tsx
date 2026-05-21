@@ -120,16 +120,26 @@ export default function CarouselBlock({ block, embedded }: Props) {
       lastTime = 0;
     }
 
-    viewport.addEventListener("mouseenter", onEnter);
-    viewport.addEventListener("mouseleave", onLeave);
+    // Pause on hover sólo en desktop con cursor fino. En touch, `mouseenter`
+    // se dispara al primer tap pero `mouseleave` nunca llega → carrusel queda
+    // pausado para siempre. Detectamos vía matchMedia.
+    const supportsHover = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    ).matches;
+    if (supportsHover) {
+      viewport.addEventListener("mouseenter", onEnter);
+      viewport.addEventListener("mouseleave", onLeave);
+    }
     viewport.addEventListener("pointerdown", onPointerDown);
 
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
-      viewport.removeEventListener("mouseenter", onEnter);
-      viewport.removeEventListener("mouseleave", onLeave);
+      if (supportsHover) {
+        viewport.removeEventListener("mouseenter", onEnter);
+        viewport.removeEventListener("mouseleave", onLeave);
+      }
       viewport.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onWindowMove);
       window.removeEventListener("pointerup", onWindowUp);

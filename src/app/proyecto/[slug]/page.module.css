@@ -2,29 +2,6 @@
   padding-bottom: var(--space-24);
 }
 
-/* ── Back link ───────────────────────────────────────────── */
-/* Mismo ancho/edge que el header y los bloques de texto → todo alineado. */
-.backWrap {
-  max-width: 760px;
-  margin-inline: auto;
-  padding-inline: var(--space-6);
-}
-
-.back {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  text-decoration: none;
-  padding: var(--space-6) 0 0;
-  transition: color var(--transition-interactive);
-}
-
-.back:hover {
-  color: var(--color-text);
-}
-
 /* ── Header ──────────────────────────────────────────────── */
 /* 760px = mismo ancho que --content-narrow dentro de ProjectContent → el
    header se alinea perfectamente con los bloques de texto debajo. */
@@ -170,9 +147,52 @@
   object-fit: cover;
 }
 
+/* ── Bottom CTA ──────────────────────────────────────────── */
+.bottomCta {
+  max-width: 760px;
+  margin-inline: auto;
+  padding: var(--space-12) var(--space-6) 0;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.75em 1.5em;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all var(--transition-interactive);
+  cursor: pointer;
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.btnSecondary:hover {
+  border-color: var(--color-text);
+  background: var(--color-surface-offset);
+}
+
+.btnSecondary span {
+  display: inline-block;
+  transition: transform var(--transition-interactive);
+}
+
+.btnSecondary:hover span {
+  transform: translateX(2px);
+}
+
+@media (max-width: 640px) {
+  .bottomCta {
+    padding-inline: var(--space-4);
+  }
+}
+
 /* ── Móvil: padding más estrecho + header image menos panorámico ── */
 @media (max-width: 640px) {
-  .backWrap,
   .header {
     padding-inline: var(--space-4);
   }

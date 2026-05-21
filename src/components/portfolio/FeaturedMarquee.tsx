@@ -127,16 +127,27 @@ export default function FeaturedMarquee({ projects }: Props) {
       lastTime = 0;
     }
 
-    viewport.addEventListener("mouseenter", onEnter);
-    viewport.addEventListener("mouseleave", onLeave);
+    // Pause on hover sólo en dispositivos con cursor fino (desktop). En touch,
+    // mobile Safari emula `mouseenter` al primer tap pero NUNCA dispara
+    // `mouseleave` → si los enganchamos, el carrusel se queda pausado para
+    // siempre tras la primera interacción del usuario.
+    const supportsHover = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    ).matches;
+    if (supportsHover) {
+      viewport.addEventListener("mouseenter", onEnter);
+      viewport.addEventListener("mouseleave", onLeave);
+    }
     viewport.addEventListener("pointerdown", onPointerDown);
 
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
-      viewport.removeEventListener("mouseenter", onEnter);
-      viewport.removeEventListener("mouseleave", onLeave);
+      if (supportsHover) {
+        viewport.removeEventListener("mouseenter", onEnter);
+        viewport.removeEventListener("mouseleave", onLeave);
+      }
       viewport.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointermove", onWindowMove);
       window.removeEventListener("pointerup", onWindowUp);

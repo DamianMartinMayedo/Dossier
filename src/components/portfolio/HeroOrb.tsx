@@ -28,19 +28,18 @@ import styles from "./HeroOrb.module.css";
 
 const COLS = 140;
 const ROWS_DESKTOP = 90;
-const ROWS_MOBILE = 60;
+const ROWS_MOBILE = 40;
 const LINE_WIDTH = 1;
 const LERP_SPEED_DESKTOP = 0.10;
 const LERP_SPEED_MOBILE = 0.04;
 
-// Patrón de la ola — se activa cuando el cursor está cerca.
-const WAVE_FREQUENCY = 4.5;       // ciclos completos a lo ancho del canvas.
-const PHASE_PER_ROW = 0.22;       // desfase de cada fila → flujo diagonal.
+const WAVE_FREQUENCY = 4.5;
+const PHASE_PER_ROW = 0.22;
 
-// Modulación con el cursor — fuera del radio: amp = 0 (líneas planas);
-// dentro: amp crece con una campana coseno hasta MAX_AMPLITUDE en el centro.
 const FOCUS_RADIUS = 0.36;
-const MAX_AMPLITUDE = 0.045;      // pico de la ondulación (fracción del alto).
+const MAX_AMPLITUDE = 0.045;
+const MAX_AMPLITUDE_MOBILE = 0.01;
+const AMBIENT_WAVE_ANGLE = 30 * (Math.PI / 180);
 
 // Halo radial de visibilidad (alpha). Basado en `min(width, height)` para que
 // sea un círculo perceptual con mismo alcance horizontal y vertical.
@@ -55,16 +54,20 @@ function getThemeColors() {
     return {
       base: "#1c1a12",
       active: "#2a2718",
+      ambient: "#D2C8AE",
       baseRgb: "28, 26, 18",
       activeRgb: "42, 39, 24",
+      ambientRgb: "210, 200, 174",
     };
   }
-  return {
+    return {
     base: "#F3F0EB",
-    active: "#EDE6D8",
+    active: "#E5DECF",
+    ambient: "#D2C8AE",
     baseRgb: "243, 240, 235",
-    activeRgb: "237, 230, 216",
-  };
+    activeRgb: "229, 222, 207",
+    ambientRgb: "210, 200, 174",
+    };
 }
 
 export default function HeroOrb() {
@@ -79,9 +82,15 @@ export default function HeroOrb() {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Si el dispositivo no tiene puntero fino (móvil / touch), activamos el
-    // modo ambient: el foco de la ola se mueve solo via Lissajous, sin cursor.
-    const isAmbient = window.matchMedia("(hover: none)").matches;
+    // Activamos modo ambient si CUALQUIERA de estas señales sugiere touch /
+    // móvil. Chrome DevTools no siempre simula `hover: none` con los presets
+    // de dispositivo, así que añadimos `pointer: coarse` y un fallback por
+    // ancho de viewport. Lo que queremos: que en CUALQUIER móvil real y en
+    // DevTools mobile preview el efecto aparezca solo.
+    const isAmbient =
+      window.matchMedia("(hover: none)").matches ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.innerWidth < 768;
     const ROWS = isAmbient ? ROWS_MOBILE : ROWS_DESKTOP;
     const LERP_SPEED = isAmbient ? LERP_SPEED_MOBILE : LERP_SPEED_DESKTOP;
 
@@ -137,37 +146,37 @@ export default function HeroOrb() {
       const width = canvas!.width / dpr;
       const height = canvas!.height / dpr;
 
-      // En modo ambient, generamos el foco via Lissajous en función del tiempo.
-      // Frecuencias 0.7 y 1.1 son incomensurables → la trayectoria no se repite
-      // exactamente cada ciclo, sensación viva sin loop perceptible.
-      if (isAmbient) {
-        const t = timestamp * 0.0001; // ~10s por unidad
-        tx = 0.5 + 0.32 * Math.sin(t * 0.7);
-        ty = 0.5 + 0.22 * Math.cos(t * 1.1);
+      // Lerp suave del cursor (sólo aplica en modo cursor).
+      if (!isAmbient) {
+        mx += (tx - mx) * LERP_SPEED;
+        my += (ty - my) * LERP_SPEED;
       }
-
-      // Lerp suave del cursor (en ambient: hacia el target Lissajous).
-      mx += (tx - mx) * LERP_SPEED;
-      my += (ty - my) * LERP_SPEED;
 
       const focusR2 = FOCUS_RADIUS * FOCUS_RADIUS;
       const twoPiFreq = WAVE_FREQUENCY * Math.PI * 2;
+      // En ambient, fase animada en función del tiempo → la onda fluye sola.
+      const timePhase = isAmbient ? timestamp * 0.0008 : 0;
 
       ctx!.clearRect(0, 0, width, height);
       ctx!.lineWidth = LINE_WIDTH;
       ctx!.lineCap = "round";
 
-      // Halo radial: las líneas son visibles cerca del cursor y se desvanecen
-      // hasta alpha 0 lejos. Un solo strokeStyle para todas las filas porque
-      // el gradient vive en coordenadas del canvas.
-      const cx = mx * width;
-      const cy = my * height;
-      const fadeRadius = FADE_RADIUS_FACTOR * Math.min(width, height);
-      const gradient = ctx!.createRadialGradient(cx, cy, 0, cx, cy, fadeRadius);
-      gradient.addColorStop(0, `rgba(${colors.activeRgb}, 1)`);
-      gradient.addColorStop(0.45, `rgba(${colors.baseRgb}, 1)`);
-      gradient.addColorStop(1, `rgba(${colors.baseRgb}, 0)`);
-      ctx!.strokeStyle = gradient;
+      // En modo cursor (desktop): halo radial centrado en el puntero, las
+      // líneas se desvanecen lejos de él. En modo ambient (móvil): color
+      // uniforme `ambient` (warm taupe, más contraste que base) en todo el
+      // canvas — sin halo, el efecto se ve por toda la pantalla siempre.
+      if (isAmbient) {
+        ctx!.strokeStyle = `rgba(${colors.ambientRgb}, 0.15)`;
+      } else {
+        const cx = mx * width;
+        const cy = my * height;
+        const fadeRadius = FADE_RADIUS_FACTOR * Math.min(width, height);
+        const gradient = ctx!.createRadialGradient(cx, cy, 0, cx, cy, fadeRadius);
+        gradient.addColorStop(0, `rgba(${colors.activeRgb}, 1)`);
+        gradient.addColorStop(0.45, `rgba(${colors.baseRgb}, 1)`);
+        gradient.addColorStop(1, `rgba(${colors.baseRgb}, 0)`);
+        ctx!.strokeStyle = gradient;
+      }
 
       for (let r = 0; r < ROWS; r++) {
         const yNorm = (r + 0.5) / ROWS;
@@ -177,21 +186,24 @@ export default function HeroOrb() {
         for (let c = 0; c < COLS; c++) {
           const xNorm = c / (COLS - 1);
 
-          // Amplitud: cero en reposo, campana coseno cerca del cursor →
-          // las líneas son planas excepto en el área alrededor del puntero.
-          const dx = mx - xNorm;
-          const dy = my - yNorm;
-          const dist2 = dx * dx + dy * dy;
-          let amp = 0;
-          if (dist2 < focusR2) {
-            const dist = Math.sqrt(dist2);
-            const bell = 0.5 + 0.5 * Math.cos((dist / FOCUS_RADIUS) * Math.PI);
-            amp = bell * MAX_AMPLITUDE;
+          let amp: number;
+          if (isAmbient) {
+            amp = MAX_AMPLITUDE_MOBILE;
+          } else {
+            // Modo cursor: amplitud 0 en reposo, campana coseno cerca del
+            // cursor → ola sólo en el área del puntero.
+            const dx = mx - xNorm;
+            const dy = my - yNorm;
+            const dist2 = dx * dx + dy * dy;
+            amp = 0;
+            if (dist2 < focusR2) {
+              const dist = Math.sqrt(dist2);
+              const bell = 0.5 + 0.5 * Math.cos((dist / FOCUS_RADIUS) * Math.PI);
+              amp = bell * MAX_AMPLITUDE;
+            }
           }
 
-          // Onda sin animación temporal — el patrón es estático respecto al
-          // canvas. Se "revela" al pasar el cursor por encima.
-          const wave = Math.sin(xNorm * twoPiFreq + rowPhase);
+          const wave = Math.sin(xNorm * twoPiFreq + rowPhase + timePhase);
 
           const offsetY = wave * amp * height;
           const x = xNorm * width;

@@ -388,7 +388,7 @@
   .hero {
     grid-template-columns: 1fr;
     min-height: auto;
-    padding-block: var(--space-12) var(--space-10);
+    margin: var(--space-4) 0;
   }
 
   .heroRight {
