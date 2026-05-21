@@ -98,3 +98,79 @@
 .pickerItem:hover {
   background: var(--color-surface-offset);
 }
+
+/* ── Inline inserter (entre bloques) ──────────────────────────────
+   "Inline negro": línea oscura visible que conecta los dos bloques
+   vecinos, con un botón "+" dark en el centro. Al hacer hover el botón
+   pasa a primary y crece ligeramente. */
+.inlineInserter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--space-2);
+}
+
+.inlineInserter::before {
+  content: "";
+  position: absolute;
+  inset-inline: 8%;
+  top: 50%;
+  height: 1px;
+  background: var(--color-text);
+  opacity: 0.5;
+  transition: opacity var(--transition-interactive);
+}
+
+.inlineInserter:hover::before,
+.inlineInserter:focus-within::before {
+  opacity: 1;
+}
+
+.inlineInserterBtn {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-text);
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-interactive),
+              color var(--transition-interactive),
+              border-color var(--transition-interactive),
+              transform var(--transition-interactive);
+}
+
+.inlineInserterBtn:hover,
+.inlineInserterBtn[aria-expanded="true"] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  transform: scale(1.1);
+}
+
+/* Picker desplegable: z-index alto para no quedar tapado por el bloque
+   siguiente. Sin `isolation` en el padre (importante: la isolation creaba
+   un stacking context propio y los hermanos lo solapaban). */
+.inlineInserterPicker {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-1);
+}

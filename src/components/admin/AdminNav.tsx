@@ -32,10 +32,11 @@ export default function AdminNav({ userEmail }: Props) {
 
   return (
     <aside className={styles.sidebar}>
-      <div className={styles.brand}>
+      <div className={styles.header}>
         <Link href="/admin" className={styles.brandLink}>
           Admin
         </Link>
+        <ThemeToggle />
       </div>
 
       <nav className={styles.nav}>
@@ -53,7 +54,6 @@ export default function AdminNav({ userEmail }: Props) {
       <div className={styles.bottom}>
         <div className={styles.bottomRow}>
           <span className={styles.email}>{userEmail}</span>
-          <ThemeToggle />
         </div>
         <button onClick={handleLogout} className={styles.logout}>
           Cerrar sesión

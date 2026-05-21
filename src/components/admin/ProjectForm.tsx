@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { slugify } from "@/lib/utils";
@@ -41,6 +41,48 @@ export default function ProjectForm({ project }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [backModalOpen, setBackModalOpen] = useState(false);
+
+  // Snapshot del estado inicial — usado para detectar cambios no guardados.
+  // Tras un guardado exitoso, lo reseteamos al estado actual para que el
+  // formulario vuelva a considerarse "limpio".
+  const [snapshot, setSnapshot] = useState(() =>
+    JSON.stringify({ form, coverImage, headerImage, content }),
+  );
+
+  const isDirty =
+    JSON.stringify({ form, coverImage, headerImage, content }) !== snapshot;
+
+  // Aviso del browser al cerrar pestaña / refrescar con cambios sin guardar.
+  useEffect(() => {
+    if (!isDirty) return;
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty]);
+
+  function handleBack() {
+    if (isDirty) {
+      setBackModalOpen(true);
+    } else {
+      router.push("/admin/proyectos");
+    }
+  }
+
+  async function saveAndExit() {
+    setBackModalOpen(false);
+    // Marcamos un flag para que tras el guardado se redirija (en vez de
+    // quedarse en la página con toast). Lo hacemos llamando directamente
+    // a handleSubmit pero indicando "exit after".
+    await submitInternal({ exitAfter: true });
+  }
+
+  function discardAndExit() {
+    setBackModalOpen(false);
+    router.push("/admin/proyectos");
+  }
 
   function updateField<K extends keyof ProjectFormData>(key: K, value: ProjectFormData[K]) {
     setForm((prev) => {
@@ -67,8 +109,7 @@ export default function ProjectForm({ project }: Props) {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function submitInternal(opts: { exitAfter?: boolean } = {}) {
     setLoading(true);
     setError("");
 
@@ -105,9 +146,17 @@ export default function ProjectForm({ project }: Props) {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || "Error al guardar");
 
+      if (opts.exitAfter) {
+        router.push("/admin/proyectos");
+        router.refresh();
+        return;
+      }
+
       if (isEditing) {
         // Al editar nos quedamos en la misma página → sólo refrescamos y
-        // mostramos toast. Así no se pierde el scroll/contexto.
+        // mostramos toast. Así no se pierde el scroll/contexto. Reset
+        // del snapshot para que el form quede "limpio" tras guardar.
+        setSnapshot(JSON.stringify({ form, coverImage, headerImage, content }));
         setToast("Proyecto actualizado");
         router.refresh();
       } else {
@@ -121,6 +170,11 @@ export default function ProjectForm({ project }: Props) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    void submitInternal();
   }
 
   async function handleDelete() {
@@ -148,6 +202,16 @@ export default function ProjectForm({ project }: Props) {
 
   return (
     <>
+    <button
+      type="button"
+      onClick={handleBack}
+      className={styles.backBtn}
+      aria-label="Volver a Proyectos"
+    >
+      <span aria-hidden="true">←</span> Volver a Proyectos
+      {isDirty && <span className={styles.dirtyDot} aria-label="cambios sin guardar" />}
+    </button>
+
     <form id="project-form" onSubmit={handleSubmit} className={styles.form}>
       {error && <p className={styles.error}>{error}</p>}
 
@@ -249,6 +313,54 @@ export default function ProjectForm({ project }: Props) {
         </aside>
       </div>
     </form>
+
+    {/* ── Modal de confirmación al salir con cambios sin guardar ── */}
+    {backModalOpen && (
+      <div
+        className={styles.modalBackdrop}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="unsaved-modal-title"
+        onClick={() => setBackModalOpen(false)}
+      >
+        <div
+          className={styles.modal}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 id="unsaved-modal-title" className={styles.modalTitle}>
+            Tienes cambios sin guardar
+          </h2>
+          <p className={styles.modalText}>
+            ¿Quieres guardar los cambios antes de salir, o descartarlos?
+          </p>
+          <div className={styles.modalActions}>
+            <button
+              type="button"
+              className={styles.modalCancel}
+              onClick={() => setBackModalOpen(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={styles.modalDiscard}
+              onClick={discardAndExit}
+            >
+              Salir sin guardar
+            </button>
+            <button
+              type="button"
+              className={styles.modalSave}
+              onClick={saveAndExit}
+              disabled={loading}
+            >
+              {loading ? "Guardando…" : "Guardar y salir"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
     <Toast message={toast} onClose={() => setToast(null)} />
     </>
   );

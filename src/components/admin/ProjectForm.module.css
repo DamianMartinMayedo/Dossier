@@ -4,6 +4,175 @@
   gap: var(--space-5);
 }
 
+/* ── Back button (flecha "Volver a Proyectos") ──────────── */
+.backBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
+  margin-bottom: var(--space-4);
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-interactive),
+              color var(--transition-interactive),
+              gap var(--transition-interactive);
+}
+
+.backBtn:hover {
+  background: var(--color-surface-offset);
+  color: var(--color-text);
+  gap: var(--space-3);
+}
+
+.backBtn:hover span:first-child {
+  transform: translateX(-2px);
+}
+
+.backBtn span:first-child {
+  font-size: 1.1em;
+  display: inline-block;
+  transition: transform var(--transition-interactive);
+}
+
+/* Punto rojo indicador de cambios pendientes. */
+.dirtyDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  display: inline-block;
+}
+
+/* ── Modal "cambios sin guardar" ────────────────────────── */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklch, var(--color-text) 60%, transparent);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  animation: backdrop-in 200ms ease-out;
+}
+
+.modal {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  max-width: 480px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: modal-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.modalTitle {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+}
+
+.modalText {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-6);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.modalCancel,
+.modalDiscard,
+.modalSave {
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-interactive);
+  line-height: 1.4;
+}
+
+.modalCancel {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.modalCancel:hover {
+  background: var(--color-surface-offset);
+  color: var(--color-text);
+}
+
+.modalDiscard {
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.modalDiscard:hover {
+  background: var(--color-error-bg);
+}
+
+.modalSave {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-text);
+}
+
+.modalSave:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.modalSave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalBackdrop,
+  .modal {
+    animation: none;
+  }
+}
+
 .error {
   padding: var(--space-3) var(--space-4);
   background: var(--color-error-bg);

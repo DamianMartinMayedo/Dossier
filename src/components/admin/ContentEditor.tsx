@@ -34,6 +34,12 @@ export default function ContentEditor({ blocks, onChange }: Props) {
     setPickerOpen(false);
   }
 
+  function insertAt(index: number, type: ContentBlockType) {
+    const next = [...blocks];
+    next.splice(index, 0, createBlock(type));
+    onChange(next);
+  }
+
   function updateBlock(index: number, next: ContentBlock) {
     onChange(blocks.map((b, i) => (i === index ? next : b)));
   }
@@ -79,19 +85,31 @@ export default function ContentEditor({ blocks, onChange }: Props) {
       </header>
 
       <div className={styles.list}>
+        {/* Inserter antes del primer bloque (sólo si ya hay alguno; cuando la
+            lista está vacía, el call-to-action principal es el botón grande
+            de abajo). */}
+        {blocks.length > 0 && (
+          <InlineInserter onInsert={(t) => insertAt(0, t)} />
+        )}
+
         {blocks.map((block, i) => (
-          <BlockShell
-            key={block.id}
-            block={block}
-            index={i}
-            total={blocks.length}
-            onRemove={() => removeBlock(i)}
-            onMoveUp={() => moveBlock(i, -1)}
-            onMoveDown={() => moveBlock(i, 1)}
-          >
-            {renderBlockForm(block, i)}
-          </BlockShell>
+          <div key={block.id}>
+            <BlockShell
+              block={block}
+              index={i}
+              total={blocks.length}
+              onRemove={() => removeBlock(i)}
+              onMoveUp={() => moveBlock(i, -1)}
+              onMoveDown={() => moveBlock(i, 1)}
+            >
+              {renderBlockForm(block, i)}
+            </BlockShell>
+            {/* Inserter después de cada bloque → permite añadir en cualquier
+                posición sin tener que arrastrar desde el final. */}
+            <InlineInserter onInsert={(t) => insertAt(i + 1, t)} />
+          </div>
         ))}
+
         {blocks.length === 0 && (
           <p className={styles.empty}>
             Aún no hay bloques. Añade el primero abajo.
@@ -125,5 +143,53 @@ export default function ContentEditor({ blocks, onChange }: Props) {
         )}
       </div>
     </section>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   Inserter inline — botón discreto que aparece entre bloques.
+   Click → expande un picker con los tipos disponibles. Cada instancia
+   gestiona su propio estado de apertura para que abrir uno no afecte
+   a los demás.
+   ─────────────────────────────────────────────────────────────────*/
+interface InlineInserterProps {
+  onInsert: (type: ContentBlockType) => void;
+}
+
+function InlineInserter({ onInsert }: InlineInserterProps) {
+  const [open, setOpen] = useState(false);
+
+  function pick(type: ContentBlockType) {
+    onInsert(type);
+    setOpen(false);
+  }
+
+  return (
+    <div className={styles.inlineInserter}>
+      <button
+        type="button"
+        className={styles.inlineInserterBtn}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-label="Añadir bloque en esta posición"
+      >
+        +
+      </button>
+      {open && (
+        <div className={styles.inlineInserterPicker} role="menu">
+          {BLOCK_TYPES.map((t) => (
+            <button
+              key={t}
+              type="button"
+              className={styles.pickerItem}
+              onClick={() => pick(t)}
+              role="menuitem"
+            >
+              {BLOCK_LABELS[t]}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

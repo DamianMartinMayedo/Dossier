@@ -122,14 +122,6 @@ export default async function SobreMi() {
           <a href={`mailto:${CONTACT.email}`} className={styles.btnPrimary}>
             Email <span>↗</span>
           </a>
-          <a
-            href={CONTACT.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.btnPrimary}
-          >
-            LinkedIn <span>↗</span>
-          </a>
         </div>
       </section>
     </div>

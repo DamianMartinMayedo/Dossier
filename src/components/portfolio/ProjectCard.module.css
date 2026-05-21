@@ -79,7 +79,8 @@
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: hidden;
 }
@@ -150,6 +151,9 @@
 
 .body {
   padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .title {
@@ -177,6 +181,7 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
+  margin-top: auto;
 }
 
 .footerLeft {

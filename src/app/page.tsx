@@ -86,7 +86,7 @@ export default async function Home() {
             <div className={styles.aboutTeaser}>
               <p className="section-label">Sobre mí</p>
               <h2 className={styles.aboutTitle}>
-                Diseño con visión de <em>producto.</em>
+                Diseño integral, del <em>concepto al producto.</em>
               </h2>
               <p className={styles.aboutText}>
                 Tengo experiencia en procesos completos de UI/UX (end to end), creando identidades corporativas, sistemas visuales y piezas para web, RRSS, impresos y producto digital en general.
@@ -119,9 +119,6 @@ export default async function Home() {
               </a>
               <a href={`mailto:${CONTACT.email}`} className={styles.btnPrimary}>
                 Email <span>↗</span>
-              </a>
-              <a href={CONTACT.linkedin} target="_blank" rel="noopener noreferrer" className={styles.btnPrimary}>
-                LinkedIn <span>↗</span>
               </a>
             </div>
           </div>

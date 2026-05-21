@@ -8,7 +8,36 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.filter {
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  background: transparent;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-interactive);
+}
+
+.filter:hover {
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+.active {
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-color: var(--color-text);
 }
 
 .title {
