@@ -38,10 +38,10 @@ export default async function Home() {
               <h1 className={styles.name}>
                 Hola
 
-                <span> :)</span>
+                 <span className={styles.smiley}> :)</span>
               </h1>
               <p className={styles.descriptor}>
-                Soy Damián, diseñador gráfico y digital con alcance completo: UI/UX, identidad y sistemas visuales, piezas para web/RRSS/ editorial y producción para impresión.
+                Soy Damián, diseñador con alcance completo: UI/UX, identidad y sistemas visuales, piezas para web/RRSS/ editorial y producción para impresión.
               </p>
               <div className={styles.ctaRow}>
                 <a href="#proyectos" className={styles.btnPrimary}>

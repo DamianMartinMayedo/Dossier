@@ -77,6 +77,14 @@
   color: var(--color-primary);
 }
 
+.smiley {
+  font-size: 1em;
+  display: inline-block;
+  transform: rotate(90deg);
+  margin-left: 0.5em;
+  vertical-align: -5%;
+}
+
 .descriptor {
   font-size: var(--text-lg);
   color: var(--color-text-muted);

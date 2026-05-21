@@ -29,24 +29,26 @@ export default function CarouselBlock({ block, embedded }: Props) {
   const orientationClass =
     orientation === "horizontal" ? styles.horizontal : styles.vertical;
 
-  // ── Auto-scroll + drag handling ─────────────────────────────
+  // ── Auto-scroll + drag handling (RAF + transform, no scrollLeft) ──
   useEffect(() => {
     if (!block.images || block.images.length === 0) return;
     const viewport = viewportRef.current;
     const track = trackRef.current;
     if (!viewport || !track) return;
 
-    // Velocidad escalada al nº de imágenes (más imágenes = más rápido).
     const SPEED = Math.min(140, Math.max(60, block.images.length * 7));
     const DRAG_THRESHOLD = 5;
 
     let raf = 0;
     let lastTime = 0;
     let paused = false;
-    let pointerDown = false;
     let dragging = false;
+    let offset = 0;
+    let half = track.scrollWidth / 2;
+
+    let pointerDown = false;
     let pointerStartX = 0;
-    let scrollStartX = 0;
+    let offsetAtStart = 0;
 
     function tick(time: number) {
       raf = requestAnimationFrame(tick);
@@ -58,9 +60,11 @@ export default function CarouselBlock({ block, embedded }: Props) {
       lastTime = time;
       if (paused || dragging) return;
 
-      viewport!.scrollLeft += (SPEED * dt) / 1000;
-      const half = track!.scrollWidth / 2;
-      if (viewport!.scrollLeft >= half) viewport!.scrollLeft -= half;
+      offset -= (SPEED * dt) / 1000;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+
+      track!.style.transform = `translateX(${offset}px)`;
     }
 
     function onEnter() {
@@ -76,7 +80,7 @@ export default function CarouselBlock({ block, embedded }: Props) {
       pointerDown = true;
       dragging = false;
       pointerStartX = e.clientX;
-      scrollStartX = viewport!.scrollLeft;
+      offsetAtStart = offset;
       window.addEventListener("pointermove", onWindowMove);
       window.addEventListener("pointerup", onWindowUp);
       window.addEventListener("pointercancel", onWindowUp);
@@ -88,12 +92,13 @@ export default function CarouselBlock({ block, embedded }: Props) {
       if (!dragging) {
         if (Math.abs(dx) < DRAG_THRESHOLD) return;
         dragging = true;
-        viewport!.classList.add(styles.grabbing);
+        track!.classList.add(styles.grabbing);
       }
-      viewport!.scrollLeft = scrollStartX - dx;
-      const half = track!.scrollWidth / 2;
-      if (viewport!.scrollLeft < 0) viewport!.scrollLeft += half;
-      else if (viewport!.scrollLeft >= half) viewport!.scrollLeft -= half;
+      offset = offsetAtStart + dx;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+      if (offset > 0) offset -= half;
+      track!.style.transform = `translateX(${offset}px)`;
       e.preventDefault();
     }
 
@@ -105,24 +110,20 @@ export default function CarouselBlock({ block, embedded }: Props) {
       window.removeEventListener("pointercancel", onWindowUp);
 
       if (dragging) {
-        viewport!.classList.remove(styles.grabbing);
-        // Suprimimos el click sintético que vendría tras el drag.
+        track!.classList.remove(styles.grabbing);
         const suppress = (ev: Event) => {
           ev.preventDefault();
           ev.stopPropagation();
         };
-        viewport!.addEventListener("click", suppress, { capture: true, once: true });
+        track!.addEventListener("click", suppress, { capture: true, once: true });
         setTimeout(() => {
-          viewport!.removeEventListener("click", suppress, { capture: true } as EventListenerOptions);
+          track!.removeEventListener("click", suppress, { capture: true } as EventListenerOptions);
         }, 0);
       }
       dragging = false;
       lastTime = 0;
     }
 
-    // Pause on hover sólo en desktop con cursor fino. En touch, `mouseenter`
-    // se dispara al primer tap pero `mouseleave` nunca llega → carrusel queda
-    // pausado para siempre. Detectamos vía matchMedia.
     const supportsHover = window.matchMedia(
       "(hover: hover) and (pointer: fine)",
     ).matches;
@@ -131,6 +132,19 @@ export default function CarouselBlock({ block, embedded }: Props) {
       viewport.addEventListener("mouseleave", onLeave);
     }
     viewport.addEventListener("pointerdown", onPointerDown);
+
+    // Mouse wheel support — horizontal (Magic Mouse/trackpad) or vertical (regular mouse).
+    function onWheel(e: WheelEvent) {
+      if (dragging) return;
+      const delta = Math.abs(e.deltaX) > 1 ? e.deltaX : e.deltaY;
+      offset -= delta;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+      if (offset > 0) offset -= half;
+      track!.style.transform = `translateX(${offset}px)`;
+      e.preventDefault();
+    }
+    track.addEventListener("wheel", onWheel, { passive: false });
 
     raf = requestAnimationFrame(tick);
 
@@ -141,6 +155,7 @@ export default function CarouselBlock({ block, embedded }: Props) {
         viewport.removeEventListener("mouseleave", onLeave);
       }
       viewport.removeEventListener("pointerdown", onPointerDown);
+      track.removeEventListener("wheel", onWheel);
       window.removeEventListener("pointermove", onWindowMove);
       window.removeEventListener("pointerup", onWindowUp);
       window.removeEventListener("pointercancel", onWindowUp);

@@ -16,15 +16,13 @@ interface Props {
 }
 
 export default function CollabGridClient({ rows }: Props) {
-  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (rows.length === 0) return;
 
-    const viewport = viewportRef.current;
     const track = trackRef.current;
-    if (!viewport || !track) return;
+    if (!track) return;
 
     const SPEED = 80;
     const DRAG_THRESHOLD = 5;
@@ -32,10 +30,13 @@ export default function CollabGridClient({ rows }: Props) {
     let raf = 0;
     let lastTime = 0;
     let paused = false;
-    let pointerDown = false;
     let dragging = false;
+    let offset = 0;
+    let half = track.scrollWidth / 2;
+
+    let pointerDown = false;
     let pointerStartX = 0;
-    let scrollStartX = 0;
+    let offsetAtStart = 0;
 
     function tick(time: number) {
       raf = requestAnimationFrame(tick);
@@ -47,9 +48,11 @@ export default function CollabGridClient({ rows }: Props) {
       lastTime = time;
       if (paused || dragging) return;
 
-      viewport!.scrollLeft += (SPEED * dt) / 1000;
-      const half = track!.scrollWidth / 2;
-      if (viewport!.scrollLeft >= half) viewport!.scrollLeft -= half;
+      offset -= (SPEED * dt) / 1000;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+
+      track!.style.transform = `translateX(${offset}px)`;
     }
 
     function onPointerDown(e: PointerEvent) {
@@ -57,7 +60,7 @@ export default function CollabGridClient({ rows }: Props) {
       pointerDown = true;
       dragging = false;
       pointerStartX = e.clientX;
-      scrollStartX = viewport!.scrollLeft;
+      offsetAtStart = offset;
       window.addEventListener("pointermove", onWindowMove);
       window.addEventListener("pointerup", onWindowUp);
       window.addEventListener("pointercancel", onWindowUp);
@@ -69,12 +72,13 @@ export default function CollabGridClient({ rows }: Props) {
       if (!dragging) {
         if (Math.abs(dx) < DRAG_THRESHOLD) return;
         dragging = true;
-        viewport!.classList.add(styles.grabbing);
+        track!.classList.add(styles.grabbing);
       }
-      viewport!.scrollLeft = scrollStartX - dx;
-      const half = track!.scrollWidth / 2;
-      if (viewport!.scrollLeft < 0) viewport!.scrollLeft += half;
-      else if (viewport!.scrollLeft >= half) viewport!.scrollLeft -= half;
+      offset = offsetAtStart + dx;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+      if (offset > 0) offset -= half;
+      track!.style.transform = `translateX(${offset}px)`;
       e.preventDefault();
     }
 
@@ -86,14 +90,14 @@ export default function CollabGridClient({ rows }: Props) {
       window.removeEventListener("pointercancel", onWindowUp);
 
       if (dragging) {
-        viewport!.classList.remove(styles.grabbing);
+        track!.classList.remove(styles.grabbing);
         const suppressClick = (ev: Event) => {
           ev.preventDefault();
           ev.stopPropagation();
         };
-        viewport!.addEventListener("click", suppressClick, { capture: true, once: true });
+        track!.addEventListener("click", suppressClick, { capture: true, once: true });
         setTimeout(() => {
-          viewport!.removeEventListener("click", suppressClick, { capture: true } as EventListenerOptions);
+          track!.removeEventListener("click", suppressClick, { capture: true } as EventListenerOptions);
         }, 0);
       }
       dragging = false;
@@ -102,20 +106,34 @@ export default function CollabGridClient({ rows }: Props) {
 
     const supportsHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (supportsHover) {
-      viewport.addEventListener("mouseenter", () => { paused = true; });
-      viewport.addEventListener("mouseleave", () => { paused = false; lastTime = 0; });
+      track.addEventListener("mouseenter", () => { paused = true; });
+      track.addEventListener("mouseleave", () => { paused = false; lastTime = 0; });
     }
-    viewport.addEventListener("pointerdown", onPointerDown);
+    track.addEventListener("pointerdown", onPointerDown);
+
+    // Mouse wheel support — horizontal (Magic Mouse/trackpad) or vertical (regular mouse).
+    function onWheel(e: WheelEvent) {
+      if (dragging) return;
+      const delta = Math.abs(e.deltaX) > 1 ? e.deltaX : e.deltaY;
+      offset -= delta;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+      if (offset > 0) offset -= half;
+      track!.style.transform = `translateX(${offset}px)`;
+      e.preventDefault();
+    }
+    track.addEventListener("wheel", onWheel, { passive: false });
 
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
       if (supportsHover) {
-        viewport.removeEventListener("mouseenter", () => {});
-        viewport.removeEventListener("mouseleave", () => {});
+        track.removeEventListener("mouseenter", () => {});
+        track.removeEventListener("mouseleave", () => {});
       }
-      viewport.removeEventListener("pointerdown", onPointerDown);
+      track.removeEventListener("pointerdown", onPointerDown);
+      track.removeEventListener("wheel", onWheel);
       window.removeEventListener("pointermove", onWindowMove);
       window.removeEventListener("pointerup", onWindowUp);
       window.removeEventListener("pointercancel", onWindowUp);
@@ -128,20 +146,18 @@ export default function CollabGridClient({ rows }: Props) {
 
   return (
     <div className={styles.wrap}>
-      <div ref={viewportRef} className={styles.viewport}>
-        <div ref={trackRef} className={styles.track}>
-          {items.map((logo, i) => (
-            <div key={`${logo.id}-${i}`} className={styles.item}>
-              <Image
-                src={logo.image_url}
-                alt={logo.name}
-                width={200}
-                height={56}
-                className={styles.logo}
-              />
-            </div>
-          ))}
-        </div>
+      <div ref={trackRef} className={styles.track}>
+        {items.map((logo, i) => (
+          <div key={`${logo.id}-${i}`} className={styles.item}>
+            <Image
+              src={logo.image_url}
+              alt={logo.name}
+              width={200}
+              height={56}
+              className={styles.logo}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -20,21 +20,6 @@
   padding-block: var(--space-4);
 }
 
-.viewport {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  cursor: grab;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
-}
-
-.viewport::-webkit-scrollbar {
-  display: none;
-}
-
 .grabbing {
   cursor: grabbing;
 }
@@ -45,6 +30,7 @@
   gap: var(--space-12);
   width: max-content;
   padding-block: var(--space-1);
+  will-change: transform;
 }
 
 .item {

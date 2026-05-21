@@ -12,41 +12,37 @@ interface Props {
 /**
  * Marquee horizontal infinito de proyectos destacados.
  *
- * Implementación scroll-based (no transform): el viewport tiene `overflow-x: auto`
- * y un RAF loop incrementa `scrollLeft`. Al pasar la mitad del track (lista
- * duplicada), restamos esa mitad → loop invisible.
+ * Implementación RAF + transform: translateX() (no scrollLeft).
+ * Safari aplica scroll-smoothing a los cambios de `scrollLeft` pero NO
+ * a las asignaciones directas de `transform` → velocidad consistente
+ * en todos los navegadores.
  *
- * Drag-scroll que no rompe clicks:
- * - `pointerdown` sólo guarda la posición inicial. No setea dragging, no captura.
- * - `pointermove` (en `window` para soportar drag fuera del viewport) activa el
- *   modo drag sólo si el desplazamiento supera `DRAG_THRESHOLD`. Antes de eso,
- *   el evento se trata como un click potencial.
- * - Si hubo drag, en `pointerup` se inyecta un listener de captura one-shot
- *   sobre `click` para suprimir la navegación del Link.
+ * Drag: pointerdown → modo drag, pointerup → reanuda auto-scroll.
+ * Click suppression tras drag para no navegar accidentalmente.
  */
 export default function FeaturedMarquee({ projects }: Props) {
-  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!projects || projects.length === 0) return;
 
-    const viewport = viewportRef.current;
     const track = trackRef.current;
-    if (!viewport || !track) return;
+    if (!track) return;
 
     const SPEED = Math.min(120, Math.max(60, projects.length * 8));
-    const DRAG_THRESHOLD = 5; // px antes de considerar que es un drag.
+    const DRAG_THRESHOLD = 5;
 
     let raf = 0;
     let lastTime = 0;
     let paused = false;
-
-    // Estado del puntero — se reinicia en cada pointerdown.
-    let pointerDown = false;
     let dragging = false;
+    let offset = 0;
+    let half = track.scrollWidth / 2;
+
+    // Drag state
+    let pointerDown = false;
     let pointerStartX = 0;
-    let scrollStartX = 0;
+    let offsetAtStart = 0;
 
     function tick(time: number) {
       raf = requestAnimationFrame(tick);
@@ -58,17 +54,11 @@ export default function FeaturedMarquee({ projects }: Props) {
       lastTime = time;
       if (paused || dragging) return;
 
-      viewport!.scrollLeft += (SPEED * dt) / 1000;
-      const half = track!.scrollWidth / 2;
-      if (viewport!.scrollLeft >= half) viewport!.scrollLeft -= half;
-    }
+      offset -= (SPEED * dt) / 1000;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
 
-    function onEnter() {
-      paused = true;
-    }
-    function onLeave() {
-      paused = false;
-      lastTime = 0;
+      track!.style.transform = `translateX(${offset}px)`;
     }
 
     function onPointerDown(e: PointerEvent) {
@@ -76,10 +66,7 @@ export default function FeaturedMarquee({ projects }: Props) {
       pointerDown = true;
       dragging = false;
       pointerStartX = e.clientX;
-      scrollStartX = viewport!.scrollLeft;
-      // Listeners globales: el drag debe sobrevivir aunque el cursor salga
-      // del viewport. NO usamos setPointerCapture porque interfiere con la
-      // entrega de los `click` events a los Links internos.
+      offsetAtStart = offset;
       window.addEventListener("pointermove", onWindowMove);
       window.addEventListener("pointerup", onWindowUp);
       window.addEventListener("pointercancel", onWindowUp);
@@ -90,65 +77,70 @@ export default function FeaturedMarquee({ projects }: Props) {
       const dx = e.clientX - pointerStartX;
       if (!dragging) {
         if (Math.abs(dx) < DRAG_THRESHOLD) return;
-        // Cruzamos el umbral → modo drag.
         dragging = true;
-        viewport!.classList.add(styles.grabbing);
+        track!.classList.add(styles.grabbing);
       }
-      viewport!.scrollLeft = scrollStartX - dx;
-      const half = track!.scrollWidth / 2;
-      if (viewport!.scrollLeft < 0) viewport!.scrollLeft += half;
-      else if (viewport!.scrollLeft >= half) viewport!.scrollLeft -= half;
+      offset = offsetAtStart + dx;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+      if (offset > 0) offset -= half;
+      track!.style.transform = `translateX(${offset}px)`;
       e.preventDefault();
     }
 
     function onWindowUp() {
       if (!pointerDown) return;
+      const wasDragging = dragging;
       pointerDown = false;
       window.removeEventListener("pointermove", onWindowMove);
       window.removeEventListener("pointerup", onWindowUp);
       window.removeEventListener("pointercancel", onWindowUp);
 
-      if (dragging) {
-        viewport!.classList.remove(styles.grabbing);
-        // Suprimimos el click que el browser está a punto de disparar tras el
-        // pointerup: si arrastramos, no queremos navegar al Link debajo. El
-        // setTimeout(0) limpia el handler si por alguna razón no llega click
-        // (evita que se cuele en el siguiente).
+      if (wasDragging) {
+        track!.classList.remove(styles.grabbing);
         const suppressClick = (ev: Event) => {
           ev.preventDefault();
           ev.stopPropagation();
         };
-        viewport!.addEventListener("click", suppressClick, { capture: true, once: true });
+        track!.addEventListener("click", suppressClick, { capture: true, once: true });
         setTimeout(() => {
-          viewport!.removeEventListener("click", suppressClick, { capture: true } as EventListenerOptions);
+          track!.removeEventListener("click", suppressClick, { capture: true } as EventListenerOptions);
         }, 0);
       }
       dragging = false;
       lastTime = 0;
     }
 
-    // Pause on hover sólo en dispositivos con cursor fino (desktop). En touch,
-    // mobile Safari emula `mouseenter` al primer tap pero NUNCA dispara
-    // `mouseleave` → si los enganchamos, el carrusel se queda pausado para
-    // siempre tras la primera interacción del usuario.
-    const supportsHover = window.matchMedia(
-      "(hover: hover) and (pointer: fine)",
-    ).matches;
+    const supportsHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (supportsHover) {
-      viewport.addEventListener("mouseenter", onEnter);
-      viewport.addEventListener("mouseleave", onLeave);
+      track.addEventListener("mouseenter", () => { paused = true; });
+      track.addEventListener("mouseleave", () => { paused = false; lastTime = 0; });
     }
-    viewport.addEventListener("pointerdown", onPointerDown);
+    track.addEventListener("pointerdown", onPointerDown);
+
+    // Mouse wheel support — horizontal (Magic Mouse/trackpad) or vertical (regular mouse).
+    function onWheel(e: WheelEvent) {
+      if (dragging) return;
+      const delta = Math.abs(e.deltaX) > 1 ? e.deltaX : e.deltaY;
+      offset -= delta;
+      if (half === 0) half = track!.scrollWidth / 2;
+      if (offset <= -half) offset += half;
+      if (offset > 0) offset -= half;
+      track!.style.transform = `translateX(${offset}px)`;
+      e.preventDefault();
+    }
+    track.addEventListener("wheel", onWheel, { passive: false });
 
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
       if (supportsHover) {
-        viewport.removeEventListener("mouseenter", onEnter);
-        viewport.removeEventListener("mouseleave", onLeave);
+        track.removeEventListener("mouseenter", () => {});
+        track.removeEventListener("mouseleave", () => {});
       }
-      viewport.removeEventListener("pointerdown", onPointerDown);
+      track.removeEventListener("pointerdown", onPointerDown);
+      track.removeEventListener("wheel", onWheel);
       window.removeEventListener("pointermove", onWindowMove);
       window.removeEventListener("pointerup", onWindowUp);
       window.removeEventListener("pointercancel", onWindowUp);
@@ -166,21 +158,19 @@ export default function FeaturedMarquee({ projects }: Props) {
       aria-roledescription="carrusel"
       aria-label="Proyectos destacados"
     >
-      <div ref={viewportRef} className={styles.viewport}>
-        <div ref={trackRef} className={styles.track}>
-          {doubled.map((project, i) => {
-            const isDuplicate = i >= projects.length;
-            return (
-              <div
-                key={`${project.id}-${i}`}
-                className={styles.item}
-                aria-hidden={isDuplicate ? "true" : undefined}
-              >
-                <ProjectCard project={project} variant="home" span={4} />
-              </div>
-            );
-          })}
-        </div>
+      <div ref={trackRef} className={styles.track}>
+        {doubled.map((project, i) => {
+          const isDuplicate = i >= projects.length;
+          return (
+            <div
+              key={`${project.id}-${i}`}
+              className={styles.item}
+              aria-hidden={isDuplicate ? "true" : undefined}
+            >
+              <ProjectCard project={project} variant="home" span={4} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

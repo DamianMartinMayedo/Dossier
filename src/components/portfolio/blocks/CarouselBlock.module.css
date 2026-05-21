@@ -1,16 +1,7 @@
-/* ── Carrusel marquee infinito (scroll-based) ──────────────────
+/* ── Carrusel marquee infinito (RAF + transform) ──────────────
  *
- * Estrategia: el viewport tiene overflow-x:auto y JS anima `scrollLeft`
- * vía RAF. Al cruzar la mitad del track (lista duplicada) restamos esa
- * mitad → loop invisible. Esto permite drag-scroll con el ratón sin
- * pelearse con una animación CSS de transform.
- *
- * Soporta dos orientaciones de items:
- *  - `.vertical` (default): aspect 9/16 tipo móvil (180/240px de ancho).
- *  - `.horizontal`: aspect 4/3 tipo paisaje (280/360px de ancho).
- *
- * Click en una imagen → abre lightbox con zoom-in cinematográfico
- * (mismo efecto que las cards secundarias).
+ * Safari aplica scroll-smoothing a los cambios de `scrollLeft` pero NO
+ * a las asignaciones directas de `transform` → velocidad consistente.
  */
 
 .wrap {
@@ -22,17 +13,8 @@
 
 .viewport {
   width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   cursor: grab;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overscroll-behavior-x: contain;
-  touch-action: pan-x;
-}
-
-.viewport::-webkit-scrollbar {
-  display: none;
 }
 
 .grabbing {
@@ -43,8 +25,8 @@
   display: flex;
   gap: var(--space-4);
   width: max-content;
-  /* Padding mínimo para que el shine/borde de los items no se corte. */
   padding-block: var(--space-1);
+  will-change: transform;
 }
 
 /* ── Item ───────────────────────────────────────────────────── */
@@ -165,13 +147,13 @@
   position: absolute;
   background: rgba(255, 255, 255, 0.12);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  transition: background var(--transition-interactive);
+  transition: background var(--transition-interactive), border-color var(--transition-interactive);
 }
 
 .modalClose {
@@ -180,7 +162,7 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-full);
-  font-size: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .modalNav {
@@ -205,6 +187,7 @@
 .modalClose:hover,
 .modalNav:hover {
   background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .modalImgWrap {
@@ -214,8 +197,7 @@
   height: min(85vh, 1000px);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  /* Zoom-in cinematográfico — mismo easing que el lightbox de secundarios. */
-  animation: cb-lightbox-zoom 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: cb-lightbox-zoom 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
   cursor: default;
 }
@@ -229,11 +211,13 @@
 @keyframes cb-lightbox-zoom {
   from {
     opacity: 0;
-    transform: scale(0.85);
+    transform: scale(0.7);
+    filter: blur(8px);
   }
   to {
     opacity: 1;
     transform: scale(1);
+    filter: blur(0);
   }
 }
 
