@@ -1,6 +1,4 @@
 .section {
-  /* Mismo fondo que el Marquee de palabras (var(--color-surface)) — opaco,
-     así tampoco se ve el HeroOrb a través de esta sección. */
   background: var(--color-surface);
   padding-block: clamp(var(--space-8), 4vw, var(--space-12));
   border-top: 1px solid var(--color-divider);
@@ -22,25 +20,31 @@
   padding-block: var(--space-4);
 }
 
+.viewport {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.grabbing {
+  cursor: grabbing;
+}
+
 .track {
   display: flex;
   align-items: center;
   gap: var(--space-12);
   width: max-content;
-  animation: logo-scroll 22s linear infinite;
-}
-
-.wrap:hover .track {
-  animation-play-state: paused;
-}
-
-@keyframes logo-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  padding-block: var(--space-1);
 }
 
 .item {
@@ -62,9 +66,6 @@
 
 .item:hover .logo {
   filter: grayscale(0);
-  /* Sin blend: el logo se muestra con sus colores reales. Si dejamos
-     `multiply` activo, los canales se mezclan con el bg y la turquesa
-     (u otra marca) sale apagada/oscura. */
   mix-blend-mode: normal;
   transform: scale(1.1);
 }
