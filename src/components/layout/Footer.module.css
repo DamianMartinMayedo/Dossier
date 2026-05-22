@@ -10,13 +10,21 @@
 
 .inner {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
+  text-align: center;
   gap: var(--space-4);
   max-width: var(--content-wide);
   margin-inline: auto;
   padding-inline: var(--space-6);
+}
+
+@media (min-width: 640px) {
+  .inner {
+    flex-direction: row;
+    text-align: start;
+  }
 }
 
 .copy {

@@ -34,9 +34,11 @@ const LERP_SPEED_DESKTOP = 0.10;
 const LERP_SPEED_MOBILE = 0.04;
 
 const WAVE_FREQUENCY = 4.5;
+const WAVE_FREQUENCY_MOBILE = 1.5;
 const PHASE_PER_ROW = 0.22;
 
 const FOCUS_RADIUS = 0.36;
+const FOCUS_RADIUS_MOBILE = 0.62;
 const MAX_AMPLITUDE = 0.045;
 const MAX_AMPLITUDE_MOBILE = 0.01;
 const AMBIENT_WAVE_ANGLE = 30 * (Math.PI / 180);
@@ -91,7 +93,7 @@ export default function HeroOrb() {
       window.matchMedia("(hover: none)").matches ||
       window.matchMedia("(pointer: coarse)").matches ||
       window.innerWidth < 768;
-    const ROWS = isAmbient ? ROWS_MOBILE : ROWS_DESKTOP;
+    const ROWS = isAmbient ? 72 : ROWS_DESKTOP;
     const LERP_SPEED = isAmbient ? LERP_SPEED_MOBILE : LERP_SPEED_DESKTOP;
 
     let colors = getThemeColors();
@@ -146,37 +148,32 @@ export default function HeroOrb() {
       const width = canvas!.width / dpr;
       const height = canvas!.height / dpr;
 
-      // Lerp suave del cursor (sólo aplica en modo cursor).
-      if (!isAmbient) {
+      if (isAmbient) {
+        mx = 0.5 + 0.35 * Math.sin(timestamp * 0.0003);
+        my = 0.5 + 0.35 * Math.cos(timestamp * 0.0005);
+      } else {
         mx += (tx - mx) * LERP_SPEED;
         my += (ty - my) * LERP_SPEED;
       }
 
-      const focusR2 = FOCUS_RADIUS * FOCUS_RADIUS;
-      const twoPiFreq = WAVE_FREQUENCY * Math.PI * 2;
-      // En ambient, fase animada en función del tiempo → la onda fluye sola.
-      const timePhase = isAmbient ? timestamp * 0.0008 : 0;
+      const focusRadius = isAmbient ? FOCUS_RADIUS_MOBILE : FOCUS_RADIUS;
+      const focusR2 = focusRadius * focusRadius;
+      const waveFreq = isAmbient ? WAVE_FREQUENCY_MOBILE : WAVE_FREQUENCY;
+      const twoPiFreq = waveFreq * Math.PI * 2;
+      const timePhase = isAmbient ? timestamp * 0.00025 : 0;
 
       ctx!.clearRect(0, 0, width, height);
       ctx!.lineWidth = LINE_WIDTH;
       ctx!.lineCap = "round";
 
-      // En modo cursor (desktop): halo radial centrado en el puntero, las
-      // líneas se desvanecen lejos de él. En modo ambient (móvil): color
-      // uniforme `ambient` (warm taupe, más contraste que base) en todo el
-      // canvas — sin halo, el efecto se ve por toda la pantalla siempre.
-      if (isAmbient) {
-        ctx!.strokeStyle = `rgba(${colors.ambientRgb}, 0.15)`;
-      } else {
-        const cx = mx * width;
-        const cy = my * height;
-        const fadeRadius = FADE_RADIUS_FACTOR * Math.min(width, height);
-        const gradient = ctx!.createRadialGradient(cx, cy, 0, cx, cy, fadeRadius);
-        gradient.addColorStop(0, `rgba(${colors.activeRgb}, 1)`);
-        gradient.addColorStop(0.45, `rgba(${colors.baseRgb}, 1)`);
-        gradient.addColorStop(1, `rgba(${colors.baseRgb}, 0)`);
-        ctx!.strokeStyle = gradient;
-      }
+      const cx = mx * width;
+      const cy = my * height;
+      const fadeRadius = FADE_RADIUS_FACTOR * Math.min(width, height);
+      const gradient = ctx!.createRadialGradient(cx, cy, 0, cx, cy, fadeRadius);
+      gradient.addColorStop(0, `rgba(${colors.activeRgb}, 1)`);
+      gradient.addColorStop(0.45, `rgba(${colors.baseRgb}, 1)`);
+      gradient.addColorStop(1, `rgba(${colors.baseRgb}, 0)`);
+      ctx!.strokeStyle = gradient;
 
       for (let r = 0; r < ROWS; r++) {
         const yNorm = (r + 0.5) / ROWS;
@@ -187,20 +184,15 @@ export default function HeroOrb() {
           const xNorm = c / (COLS - 1);
 
           let amp: number;
-          if (isAmbient) {
-            amp = MAX_AMPLITUDE_MOBILE;
-          } else {
-            // Modo cursor: amplitud 0 en reposo, campana coseno cerca del
-            // cursor → ola sólo en el área del puntero.
-            const dx = mx - xNorm;
-            const dy = my - yNorm;
-            const dist2 = dx * dx + dy * dy;
-            amp = 0;
-            if (dist2 < focusR2) {
-              const dist = Math.sqrt(dist2);
-              const bell = 0.5 + 0.5 * Math.cos((dist / FOCUS_RADIUS) * Math.PI);
-              amp = bell * MAX_AMPLITUDE;
-            }
+          const dx = mx - xNorm;
+          const dy = my - yNorm;
+          const dist2 = dx * dx + dy * dy;
+          amp = 0;
+          if (dist2 < focusR2) {
+            const dist = Math.sqrt(dist2);
+            const rawBell = 0.5 + 0.5 * Math.cos((dist / focusRadius) * Math.PI);
+            const bell = isAmbient ? rawBell * rawBell : rawBell;
+            amp = bell * MAX_AMPLITUDE;
           }
 
           const wave = Math.sin(xNorm * twoPiFreq + rowPhase + timePhase);

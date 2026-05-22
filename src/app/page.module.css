@@ -435,7 +435,7 @@
   }
 
   .name {
-    font-size: clamp(3rem, 1rem + 6vw, 6rem);
+    font-size: clamp(4.5rem, 1rem + 14vw, 8.5rem);
   }
 
   .descriptor {
