@@ -9,7 +9,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "Sobre mí",
   description:
-    "Conoce más sobre Damián Martín: 8+ años en diseño UI/UX, branding y producto digital. Disponible para nuevos proyectos.",
+    "Conoce más sobre Damián Martín: 8+ años en diseño UI/UX, branding o editorial. Disponible para nuevos proyectos.",
   alternates: { canonical: "https://damianmartin.es/sobre-mi" },
 };
 
