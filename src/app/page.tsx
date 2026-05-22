@@ -41,7 +41,7 @@ export default async function Home() {
                  <span className={styles.smiley}> :)</span>
               </h1>
               <p className={styles.descriptor}>
-                Soy Damián, diseñador con alcance completo: UI/UX, identidad y sistemas visuales, piezas para web/RRSS/ editorial y producción para impresión.
+                Soy Damián, diseñador con alcance completo: UI/UX, identidad y sistemas visuales, RRSS, editorial o producción para impresión.
               </p>
               <div className={styles.ctaRow}>
                 <a href="#proyectos" className={styles.btnPrimary}>
