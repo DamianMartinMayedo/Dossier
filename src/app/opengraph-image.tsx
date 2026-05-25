@@ -1,11 +1,50 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Damián Martín — Diseñador UI/UX & generalista";
+/* Sin esto, Next 16 cachea la primera renderización y no se regenera al cambiar
+   el componente en dev. En producción la ImageResponse se sirve igualmente
+   inmutable porque la build queda fijada — esto sólo afecta a HMR en dev. */
+export const dynamic = "force-dynamic";
+export const alt =
+  "Damián Martín — Diseñador UI/UX, branding y producto digital";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OGImage() {
+/* Fuente Space Grotesk vía Google Fonts en runtime.
+   next/og corre en edge, así que no podemos leer next/font ni los .ttf locales;
+   pedimos el CSS, extraemos la URL del .ttf y lo descargamos como ArrayBuffer.
+   El resultado lo cachea Next.js entre requests. */
+async function loadGoogleFont(
+  family: string,
+  weight: number,
+  text: string,
+): Promise<ArrayBuffer> {
+  const url = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}:wght@${weight}&display=swap&text=${encodeURIComponent(text)}`;
+  const cssRes = await fetch(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    },
+  });
+  const css = await cssRes.text();
+  const match = css.match(/src:\s*url\((.+?)\)\s*format\(/);
+  if (!match) throw new Error(`No se encontró URL de la fuente ${family}`);
+  return fetch(match[1]).then((r) => r.arrayBuffer());
+}
+
+export default async function OGImage() {
+  const eyebrow = "TRABAJEMOS JUNTOS";
+  const title = "Hola :)";
+  const descriptor =
+    "Soy Damián, diseñador con alcance completo: UI/UX, identidad y sistemas visuales, RRSS, editorial o producción para impresión.";
+  const url = "damianmartin.es";
+  const allText = `${eyebrow}${title}${descriptor}${url} áéíóúñÁÉÍÓÚÑ·—:)`;
+
+  const [bold, regular] = await Promise.all([
+    loadGoogleFont("Space Grotesk", 700, title),
+    loadGoogleFont("Space Grotesk", 400, allText),
+  ]);
+
   return new ImageResponse(
     (
       <div
@@ -13,82 +52,161 @@ export default function OGImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: "80px 120px",
-          background: "#0f0f0f",
-          fontFamily: "system-ui, sans-serif",
+          background: "#f5f3ef",
           position: "relative",
+          fontFamily: "Space Grotesk",
         }}
       >
-        {/* Accent dot */}
-        <div
-          style={{
-            width: 16,
-            height: 16,
-            borderRadius: "50%",
-            background: "#3b5bff",
-            marginBottom: 32,
-          }}
-        />
-
-        {/* Name */}
-        <div
-          style={{
-            fontSize: 80,
-            fontWeight: 700,
-            color: "#f5f5f5",
-            letterSpacing: -3,
-            lineHeight: 1,
-            marginBottom: 24,
-          }}
+        {/* Capa 1: líneas horizontales en reposo del HeroOrb.
+            Satori (motor de next/og) descarta repeating-linear-gradient en
+            silencio, así que dibujamos las líneas con un <svg> embebido —
+            56 trazos a lo ancho, color cercano a --color-text-faint pero un
+            punto más visible para que sobrevivan a la compresión de WhatsApp. */}
+        <svg
+          width={1200}
+          height={630}
+          style={{ position: "absolute", top: 0, left: 0 }}
         >
-          Damián Martín
-        </div>
+          {Array.from({ length: 56 }).map((_, i) => {
+            const y = ((i + 0.5) / 56) * 630;
+            return (
+              <line
+                key={i}
+                x1={0}
+                y1={y}
+                x2={1200}
+                y2={y}
+                stroke="#cdbf9f"
+                strokeWidth={1}
+              />
+            );
+          })}
+        </svg>
 
-        {/* Role */}
-        <div
-          style={{
-            fontSize: 32,
-            color: "#888",
-            letterSpacing: -0.5,
-            marginBottom: 48,
-          }}
-        >
-          Diseñador UI/UX · Branding · Producto digital
-        </div>
-
-        {/* Divider */}
-        <div
-          style={{
-            width: 360,
-            height: 1,
-            background: "#2a2a2a",
-            marginBottom: 40,
-          }}
-        />
-
-        {/* Stats */}
-        {/* color literal = aprox --color-text-muted del theme light;
-            opengraph-image corre en edge runtime y no puede leer CSS tokens. */}
-        <div style={{ fontSize: 24, color: "#706a61" }}>
-          8+ años · 30+ proyectos · Sevilla
-        </div>
-
-        {/* URL badge */}
+        {/* Capa 2: halo radial — simula el foco del HeroOrb tras el titular.
+            En el centro deja las líneas a la vista; en los bordes se funde
+            con el bg para evocar el fade del canvas real. */}
         <div
           style={{
             position: "absolute",
-            bottom: 60,
-            right: 120,
-            fontSize: 22,
-            color: "#444",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background:
+              "radial-gradient(ellipse 60% 70% at 38% 52%, rgba(245,243,239,0) 0%, rgba(245,243,239,0.4) 50%, #f5f3ef 85%)",
+          }}
+        />
+
+        {/* Capa 3: contenido (mitad izquierda, como en el hero real) */}
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "0 96px",
+            width: "100%",
           }}
         >
-          damianmartin.es
+          {/* Eyebrow */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 32,
+              fontSize: 24,
+              letterSpacing: 3,
+              color: "#c0392b",
+              fontWeight: 500,
+            }}
+          >
+            <div
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 999,
+                background: "#c0392b",
+              }}
+            />
+            {eyebrow}
+          </div>
+
+          {/* Hola :) */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              fontWeight: 700,
+              fontSize: 220,
+              lineHeight: 0.95,
+              letterSpacing: -8,
+              color: "#1c1916",
+              marginBottom: 40,
+            }}
+          >
+            Hola
+            <span
+              style={{
+                color: "#c0392b",
+                transform: "rotate(90deg)",
+                display: "flex",
+                marginLeft: 48,
+                marginTop: 24,
+              }}
+            >
+              :)
+            </span>
+          </div>
+
+          {/* Descriptor */}
+          <div
+            style={{
+              display: "flex",
+              fontSize: 30,
+              lineHeight: 1.4,
+              color: "#706a61",
+              maxWidth: 820,
+              fontWeight: 400,
+            }}
+          >
+            {descriptor}
+          </div>
+        </div>
+
+        {/* URL badge (esquina inferior derecha) */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 48,
+            right: 96,
+            display: "flex",
+            fontSize: 22,
+            color: "#9a9388",
+            letterSpacing: 0.5,
+          }}
+        >
+          {url}
         </div>
       </div>
     ),
-    { ...size }
+    {
+      ...size,
+      fonts: [
+        {
+          name: "Space Grotesk",
+          data: bold,
+          style: "normal",
+          weight: 700,
+        },
+        {
+          name: "Space Grotesk",
+          data: regular,
+          style: "normal",
+          weight: 400,
+        },
+      ],
+    },
   );
 }
