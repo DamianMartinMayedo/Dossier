@@ -37,8 +37,7 @@ export default async function OGImage() {
   const title = "Hola :)";
   const descriptor =
     "Soy Damián, diseñador con alcance completo: UI/UX, identidad y sistemas visuales, RRSS, editorial o producción para impresión.";
-  const url = "damianmartin.es";
-  const allText = `${eyebrow}${title}${descriptor}${url} áéíóúñÁÉÍÓÚÑ·—:)`;
+  const allText = `${eyebrow}${title}${descriptor} áéíóúñÁÉÍÓÚÑ·—:)`;
 
   const [bold, regular] = await Promise.all([
     loadGoogleFont("Space Grotesk", 700, title),
@@ -152,7 +151,7 @@ export default async function OGImage() {
                 color: "#c0392b",
                 transform: "rotate(90deg)",
                 display: "flex",
-                marginLeft: 48,
+                marginLeft: 64,
                 marginTop: 24,
               }}
             >
@@ -173,21 +172,6 @@ export default async function OGImage() {
           >
             {descriptor}
           </div>
-        </div>
-
-        {/* URL badge (esquina inferior derecha) */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 48,
-            right: 96,
-            display: "flex",
-            fontSize: 22,
-            color: "#9a9388",
-            letterSpacing: 0.5,
-          }}
-        >
-          {url}
         </div>
       </div>
     ),
