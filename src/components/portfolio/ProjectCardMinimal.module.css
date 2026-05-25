@@ -11,7 +11,7 @@
 }
 
 .image {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   background: var(--color-surface-offset);
   border-radius: var(--radius-lg);
   position: relative;
@@ -22,7 +22,6 @@
   justify-content: center;
 }
 
-/* Borde base siempre visible en la imagen */
 .image::before {
   content: "";
   position: absolute;
@@ -33,70 +32,6 @@
   z-index: 2;
 }
 
-/* Shine en hover — 2px en la imagen */
-.image::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  border-radius: inherit;
-  background: conic-gradient(
-    from var(--shine-angle, 0deg),
-    transparent 0%,
-    transparent 60%,
-    var(--color-card-shine) 75%,
-    color-mix(in oklch, var(--color-card-shine) 60%, transparent) 85%,
-    transparent 92%,
-    transparent 100%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 3;
-  transition: opacity 0.3s ease;
-}
-
-.card:hover .image::after,
-.card:focus-visible .image::after {
-  opacity: 1;
-  animation: shine-rotate-minimal 2.4s linear infinite;
-}
-
-@keyframes shine-rotate-minimal {
-  to { --shine-angle: 360deg; }
-}
-
-.image {
-  aspect-ratio: 4 / 3;
-  background: var(--color-surface-offset);
-  border-radius: var(--radius-lg);
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Borde base siempre visible — sin desfase porque es el único borde */
-.image::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px var(--color-border);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Shine reflectante en hover — 2px */
 .image::after {
   content: "";
   position: absolute;
@@ -204,19 +139,11 @@
   text-transform: uppercase;
 }
 
-/* Native <dialog> — showModal() provides the focus trap and Escape key.
- *
- * IMPORTANT: scope `display` to `[open]` — el `<dialog>` sin `open` está
- * `display: none` por UA-style. Si declaramos `display: flex` sin condición,
- * todos los dialogs son visibles a la vez (bug observado: el último secundario
- * del listado se mostraba en pantalla al cargar /proyectos).
- */
 .modal {
   border: none;
   background: transparent;
   margin: 0;
   padding: 0;
-  /* Ocupar todo el viewport para que el flex-center funcione. */
   width: 100vw;
   height: 100dvh;
   max-width: 100vw;
@@ -235,7 +162,6 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-6);
-  /* Container fade-in (la animación de "zoom" la lleva .modalImgWrap dentro). */
   animation: modal-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -244,7 +170,6 @@
   to { opacity: 1; }
 }
 
-/* Dark overlay via the native ::backdrop */
 .modal::backdrop {
   background: rgba(0, 0, 0, 0.85);
   animation: backdrop-fade-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
