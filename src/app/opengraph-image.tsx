@@ -151,7 +151,7 @@ export default async function OGImage() {
                 color: "#c0392b",
                 transform: "rotate(90deg)",
                 display: "flex",
-                marginLeft: 64,
+                marginLeft: 74,
                 marginTop: 24,
               }}
             >
